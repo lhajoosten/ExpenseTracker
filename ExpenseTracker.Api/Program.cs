@@ -1,3 +1,5 @@
+using ExpenseTracker.Infrastructure.Identity;
+using ExpenseTracker.Infrastructure.Mailing;
 using Microsoft.OpenApi.Models;
 
 namespace ExpenseTracker.Api
@@ -18,9 +20,17 @@ namespace ExpenseTracker.Api
                 });
             });
 
+            // Register Identity
+            services.AddIdentityService(configuration);
+
+            // Register Mailing
+            services.AddMailingService(configuration);
+
             // Register IHttpContextAccessor
             services.AddHttpContextAccessor();
 
+            // Register Data Protection
+            services.AddDataProtection();
 
             // Add services to the container.
             builder.Services.AddControllers();
@@ -29,7 +39,7 @@ namespace ExpenseTracker.Api
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Orchestrix Admin API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "ExpenseTracker API", Version = "v1" });
 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -56,7 +66,7 @@ namespace ExpenseTracker.Api
                 });
 
                 // Explicitly set Swagger base path
-                c.AddServer(new OpenApiServer { Url = "https://localhost:4443" });
+                c.AddServer(new OpenApiServer { Url = "https://localhost:8443" });
             });
 
             var app = builder.Build();
@@ -79,9 +89,15 @@ namespace ExpenseTracker.Api
                 });
                 app.UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint("/api/v1/swagger/v1/swagger.json", "Orchestrix.Admin.Api v1");
+                    c.SwaggerEndpoint("/api/v1/swagger/v1/swagger.json", "ExpenseTracker.Api v1");
                     c.RoutePrefix = "api/v1/swagger";
                 });
+            }
+
+            // Configure middleware pipeline
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseHsts();
             }
 
             // Use Https Redirection to enforce HTTPS
