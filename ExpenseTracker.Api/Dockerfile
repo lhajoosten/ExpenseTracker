@@ -1,5 +1,3 @@
-# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 USER $APP_UID
@@ -13,9 +11,11 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["ExpenseTracker.Api/ExpenseTracker.Api.csproj", "ExpenseTracker.Api/"]
-COPY ["ExpenseTracker.Domain/ExpenseTracker.Domain.csproj", "ExpenseTracker.Domain/"]
 COPY ["ExpenseTracker.Application/ExpenseTracker.Application.csproj", "ExpenseTracker.Application/"]
-COPY ["ExpenseTracker.Persistence/ExpenseTracker.Persistence.csproj", "ExpenseTracker.Persistence/"]
+COPY ["ExpenseTracker.Domain/ExpenseTracker.Domain.csproj", "ExpenseTracker.Domain/"]
+COPY ["ExpenseTracker.Infrastructure.Identity/ExpenseTracker.Infrastructure.Identity.csproj", "ExpenseTracker.Infrastructure.Identity/"]
+COPY ["ExpenseTracker.Infrastructure.Mailing/ExpenseTracker.Infrastructure.Mailing.csproj", "ExpenseTracker.Infrastructure.Mailing/"]
+COPY ["ExpenseTracker.Infrastructure.Persistence/ExpenseTracker.Infrastructure.Persistence.csproj", "ExpenseTracker.Infrastructure.Persistence/"]
 RUN dotnet restore "./ExpenseTracker.Api/ExpenseTracker.Api.csproj"
 COPY . .
 WORKDIR "/src/ExpenseTracker.Api"

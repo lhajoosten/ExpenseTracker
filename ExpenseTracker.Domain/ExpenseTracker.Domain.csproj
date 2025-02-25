@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ExpenseTracker.Common\ExpenseTracker.Common.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace ExpenseTracker.Persistence
+﻿namespace ExpenseTracker.Core.Common
 {
     public class Class1
     {
