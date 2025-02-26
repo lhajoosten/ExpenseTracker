@@ -77,7 +77,10 @@
           "configurations": {
             "production": {
               "buildTarget": "ExpenseTracker.Angular:build:production",
-              "port": 4443
+              "port": 4443,
+              "ssl": true,
+              "sslKey": "./ssl/localhost.key",
+              "sslCert": "./ssl/localhost.crt"
             },
             "development": {
               "buildTarget": "ExpenseTracker.Angular:build:development"
