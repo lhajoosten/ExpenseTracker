@@ -51,6 +51,10 @@ namespace ExpenseTracker.Infrastructure.Identity.Services
             if (user == null)
                 return Result<ApplicationUserDto>.Failure(new Dictionary<string, string> { { "User", "User not found" } });
 
+            var appUserRoles = await _userManager.GetRolesAsync(user);
+            if (appUserRoles == null)
+                return Result<ApplicationUserDto>.Failure(new Dictionary<string, string> { { "Roles", "Roles not found" } });
+
             var userDto = new ApplicationUserDto
             {
                 Id = user.Id,
@@ -59,7 +63,7 @@ namespace ExpenseTracker.Infrastructure.Identity.Services
                 EmailConfirmed = user.EmailConfirmed,
                 PhoneNumber = user.PhoneNumber!,
                 PhoneNumberConfirmed = user.PhoneNumberConfirmed,
-                Role = new ApplicationRoleDto { Id = user.Role.Id, Name = user.Role.Name! }
+                Roles = [.. appUserRoles.Select(r => new ApplicationRoleDto { Name = r })]
             };
 
             return Result<ApplicationUserDto>.Success(userDto);
@@ -71,6 +75,10 @@ namespace ExpenseTracker.Infrastructure.Identity.Services
             if (user == null)
                 return Result<ApplicationUserDto>.Failure(new Dictionary<string, string> { { "User", "User not found" } });
 
+            var appUserRoles = await _userManager.GetRolesAsync(user);
+            if (appUserRoles == null)
+                return Result<ApplicationUserDto>.Failure(new Dictionary<string, string> { { "Roles", "Roles not found" } });
+
             var userDto = new ApplicationUserDto
             {
                 Id = user.Id,
@@ -79,7 +87,7 @@ namespace ExpenseTracker.Infrastructure.Identity.Services
                 EmailConfirmed = user.EmailConfirmed,
                 PhoneNumber = user.PhoneNumber!,
                 PhoneNumberConfirmed = user.PhoneNumberConfirmed,
-                Role = new ApplicationRoleDto { Id = user.Role.Id, Name = user.Role.Name! }
+                Roles = [.. appUserRoles.Select(r => new ApplicationRoleDto { Name = r })]
             };
 
             return Result<ApplicationUserDto>.Success(userDto);

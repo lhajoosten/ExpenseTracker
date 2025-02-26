@@ -1,6 +1,10 @@
+using Azure.Identity;
 using ExpenseTracker.Infrastructure.Identity;
+using ExpenseTracker.Infrastructure.Identity.Seeding;
 using ExpenseTracker.Infrastructure.Mailing;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 namespace ExpenseTracker.Api
 {
@@ -19,6 +23,16 @@ namespace ExpenseTracker.Api
                     configureOptions.SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
                 });
             });
+
+            if (!builder.Environment.IsDevelopment() || !IsDesignTime())
+            {
+                string keyVaultUri = builder.Configuration["KeyVault:VaultUri"]!;
+                if (!string.IsNullOrEmpty(keyVaultUri))
+                {
+                    var credential = new DefaultAzureCredential();
+                    builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUri), credential);
+                }
+            }
 
             // Register Identity
             services.AddIdentityService(configuration);
@@ -71,10 +85,25 @@ namespace ExpenseTracker.Api
 
             var app = builder.Build();
 
+            // Use custom exception middleware
+            app.UseExceptionHandler(errorApp =>
+            {
+                errorApp.Run(async context =>
+                {
+                    var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+                    var exception = exceptionHandlerPathFeature?.Error;
+                    // Log the exception
+                    await context.Response.WriteAsync($"An error occurred see the error: ${exception?.Message}");
+                });
+            });
+
+
+            app.Services.SeedIdentityDataAsync().GetAwaiter().GetResult();
+
             // Use the CORS policy
             app.UseCors(options =>
             {
-                options.WithOrigins(["https://localhost:4443", "http://localhost:4200"]);
+                options.WithOrigins(["https://localhost:4443"]);
                 options.AllowAnyMethod();
                 options.AllowAnyHeader();
                 options.AllowCredentials();
@@ -111,6 +140,11 @@ namespace ExpenseTracker.Api
             app.MapControllers();
 
             app.Run();
+        }
+
+        private static bool IsDesignTime()
+        {
+            return Assembly.GetEntryAssembly()!.FullName!.Contains("VisualStudio");
         }
     }
 }

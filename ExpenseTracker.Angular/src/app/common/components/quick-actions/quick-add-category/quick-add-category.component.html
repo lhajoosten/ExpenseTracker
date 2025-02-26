@@ -1,0 +1,129 @@
+<div class="quick-add-dialog">
+    <h2 mat-dialog-title>Add New Category</h2>
+
+    <mat-dialog-content>
+        <form [formGroup]="categoryForm" class="category-form">
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Category Name</mat-label>
+                <input
+                    matInput
+                    placeholder="Enter category name"
+                    formControlName="name"
+                />
+                <mat-error
+                    *ngIf="categoryForm.get('name')?.hasError('required')"
+                >
+                    Name is required
+                </mat-error>
+                <mat-error
+                    *ngIf="categoryForm.get('name')?.hasError('maxlength')"
+                >
+                    Name cannot exceed 50 characters
+                </mat-error>
+            </mat-form-field>
+
+            <mat-slide-toggle formControlName="isIncome" class="income-toggle">
+                Is this an income category?
+            </mat-slide-toggle>
+
+            <div class="category-visual">
+                <div class="selector-section">
+                    <label
+                        class="section-label"
+                        id="icon-selection-label"
+                        for="icon-grid"
+                        >Select an icon</label
+                    >
+                    <div
+                        class="icon-grid"
+                        id="icon-grid"
+                        role="radiogroup"
+                        aria-labelledby="icon-selection-label"
+                    >
+                        <button
+                            type="button"
+                            mat-mini-fab
+                            *ngFor="let icon of iconOptions; let i = index"
+                            [attr.id]="'icon-option-' + i"
+                            [attr.aria-label]="'Select ' + icon + ' icon'"
+                            [style.background-color]="
+                                categoryForm.get('icon')?.value === icon
+                                    ? categoryForm.get('color')?.value
+                                    : '#f5f5f5'
+                            "
+                            [style.color]="
+                                categoryForm.get('icon')?.value === icon
+                                    ? '#fff'
+                                    : '#555'
+                            "
+                            (click)="categoryForm.patchValue({ icon: icon })"
+                        >
+                            <mat-icon>{{ icon }}</mat-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="selector-section">
+                    <label
+                        class="section-label"
+                        id="color-selection-label"
+                        for="color-grid"
+                        >Select a color</label
+                    >
+                    <div
+                        class="color-grid"
+                        id="color-grid"
+                        role="radiogroup"
+                        aria-labelledby="color-selection-label"
+                    >
+                        <button
+                            type="button"
+                            mat-mini-fab
+                            *ngFor="let color of colorOptions; let i = index"
+                            [attr.id]="'color-option-' + i"
+                            [attr.aria-label]="'Select color ' + i"
+                            [style.background-color]="color"
+                            [class.selected]="
+                                categoryForm.get('color')?.value === color
+                            "
+                            (click)="categoryForm.patchValue({ color: color })"
+                        ></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-container">
+                <label
+                    class="section-label"
+                    id="preview-label"
+                    for="preview-display"
+                    >Preview</label
+                >
+                <div
+                    class="preview"
+                    id="preview-display"
+                    role="region"
+                    aria-labelledby="preview-label"
+                    [style.background-color]="categoryForm.get('color')?.value"
+                >
+                    <mat-icon>{{ categoryForm.get("icon")?.value }}</mat-icon>
+                    <span>{{
+                        categoryForm.get("name")?.value || "Category Name"
+                    }}</span>
+                </div>
+            </div>
+        </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-button (click)="onCancel()">Cancel</button>
+        <button
+            mat-raised-button
+            color="primary"
+            [disabled]="!categoryForm.valid"
+            (click)="onSubmit()"
+        >
+            Add Category
+        </button>
+    </mat-dialog-actions>
+</div>

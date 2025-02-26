@@ -1,0 +1,55 @@
+.quick-add-dialog {
+  padding: 8px;
+}
+
+.income-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+.form-field {
+  flex: 1;
+}
+
+mat-dialog-actions {
+  margin-top: 16px;
+  margin-bottom: 0;
+  padding-bottom: 8px;
+}
+
+.income-icon {
+  color: #4caf50; // Green color for income
+}
+
+textarea {
+  resize: none;
+}
+
+:host ::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
+  &.mat-form-field-outline-thick {
+    color: #4caf50;
+  }
+}
+
+// Optional: Add some styling for the accent-colored button
+button[color="accent"] {
+  background-color: #4caf50;
+  &:hover {
+    background-color: #388e3c;
+  }
+}

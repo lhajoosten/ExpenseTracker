@@ -1,17 +1,15 @@
 ﻿using AutoMapper;
 using ExpenseTracker.Common.Abstractions;
 using ExpenseTracker.Infrastructure.Identity.Data;
-using ExpenseTracker.Infrastructure.Identity.JwtSettings;
 using ExpenseTracker.Infrastructure.Identity.Mapping;
 using ExpenseTracker.Infrastructure.Identity.Models;
 using ExpenseTracker.Infrastructure.Identity.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 namespace ExpenseTracker.Infrastructure.Identity
 {
@@ -22,49 +20,64 @@ namespace ExpenseTracker.Infrastructure.Identity
             services.AddDbContext<ETIdentityContext>(options =>
                 options.UseSqlServer(
                     configuration.GetConnectionString("DevelopmentConnection"),
-                    b => b.MigrationsAssembly(typeof(ETIdentityContext).Assembly.FullName)));
+                    b => b.MigrationsAssembly(typeof(ETIdentityContext).Assembly.FullName)
+                )
+            );
 
-            services.AddIdentityServices(configuration);
+            services.AddIdentity(configuration);
             services.AddAuthServices(configuration);
             services.AddIdentityMapping();
 
             return services;
         }
 
-        private static void AddIdentityServices(this IServiceCollection services, IConfiguration configuration)
+        private static void AddIdentity(this IServiceCollection services, IConfiguration configuration)
         {
-            // Register JWT Settings
-            services.Configure<JwtSetting>(configuration.GetSection("JwtSettings"));
-
-            var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSetting>();
-            var key = Encoding.UTF8.GetBytes(jwtSettings!.Secret);
-
-            // Register JWT Authentication
             services.AddAuthentication(options =>
             {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
-            }).AddJwtBearer(options =>
+                options.DefaultAuthenticateScheme = "Identity.Application";
+                options.DefaultSignInScheme = "Identity.Application";
+                options.DefaultChallengeScheme = "Identity.Application";
+            })
+            .AddCookie("Identity.Application", options =>
             {
-                options.RequireHttpsMetadata = false;
-                options.SaveToken = true;
-                options.TokenValidationParameters = new TokenValidationParameters
+                options.Cookie.Name = "ExpenseTracker.Identity";
+                options.Events = new CookieAuthenticationEvents
                 {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidIssuer = jwtSettings.Issuer,
-                    ValidAudience = jwtSettings.Audience,
-                    ClockSkew = TimeSpan.Zero
+                    OnRedirectToLogin = context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        return Task.CompletedTask;
+                    },
+                    OnRedirectToAccessDenied = context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        return Task.CompletedTask;
+                    }
                 };
+            })
+            .AddMicrosoftAccount(options =>
+            {
+                options.ClientId = configuration["Authentication:Microsoft:ClientId"]!;
+                options.ClientSecret = configuration["Authentication:Microsoft:ClientSecret"]!;
+                options.Scope.Add("User.Read");
+                options.CallbackPath = "/api/oauth/login-callback";
+            })
+            .AddGitHub(options =>
+            {
+                options.ClientId = configuration["Authentication:GitHub:ClientId"]!;
+                options.ClientSecret = configuration["Authentication:GitHub:ClientSecret"]!;
+                options.CallbackPath = "/api/oauth/login-callback";
             });
 
             services.AddIdentityCore<AppUser>(options =>
             {
                 options.User.RequireUniqueEmail = true;
-                options.SignIn.RequireConfirmedEmail = true;
+                options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultProvider;
+                options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultProvider;
+                options.Tokens.ChangeEmailTokenProvider = TokenOptions.DefaultProvider;
+                options.Tokens.ChangePhoneNumberTokenProvider = TokenOptions.DefaultProvider;
+                options.Tokens.AuthenticatorTokenProvider = TokenOptions.DefaultProvider;
                 options.Password.RequireDigit = true;
                 options.Password.RequireLowercase = true;
                 options.Password.RequireUppercase = true;
@@ -73,13 +86,14 @@ namespace ExpenseTracker.Infrastructure.Identity
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.SignIn.RequireConfirmedPhoneNumber = false;
+                options.SignIn.RequireConfirmedEmail = true;
             })
-                .AddRoles<AppRole>()
-                .AddRoleManager<RoleManager<AppRole>>()
-                .AddUserManager<UserManager<AppUser>>()
-                .AddSignInManager<SignInManager<AppUser>>()
-                .AddEntityFrameworkStores<ETIdentityContext>()
-                .AddTokenProvider<DataProtectorTokenProvider<AppUser>>(TokenOptions.DefaultProvider);
+            .AddRoles<AppRole>()
+            .AddRoleManager<RoleManager<AppRole>>()
+            .AddUserManager<UserManager<AppUser>>()
+            .AddSignInManager<SignInManager<AppUser>>()
+            .AddEntityFrameworkStores<ETIdentityContext>()
+            .AddTokenProvider<DataProtectorTokenProvider<AppUser>>(TokenOptions.DefaultProvider);
         }
 
 

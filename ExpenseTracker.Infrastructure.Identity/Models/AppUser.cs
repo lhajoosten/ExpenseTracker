@@ -8,8 +8,5 @@ namespace ExpenseTracker.Infrastructure.Identity.Models
         public string? LastName { get; set; }
         public string? FullName => $"{FirstName} {LastName}";
         public DateTime? Birthdate { get; set; }
-
-        public Guid RoleId { get; set; }
-        public AppRole Role { get; set; }
     }
 }

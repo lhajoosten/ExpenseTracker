@@ -1,0 +1,19 @@
+.quick-add-dialog {
+  padding: 8px;
+}
+
+.expense-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+mat-dialog-actions {
+  margin-top: 16px;
+  margin-bottom: 0;
+  padding-bottom: 8px;
+}

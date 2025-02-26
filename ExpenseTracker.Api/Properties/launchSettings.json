@@ -4,7 +4,7 @@
       "commandName": "Project",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_Kestrel__Certificates__Default__Path": "C:/Users/lhajo/.aspnet/https/dev-cert.pfx",
+        "ASPNETCORE_Kestrel__Certificates__Default__Path": "%USERPROFILE%/.aspnet/https/dev-cert.pfx",
         "ASPNETCORE_Kestrel__Certificates__Default__Password": "YourSecurePassword123!"
       },
       "dotnetRunMessages": true,
@@ -12,15 +12,15 @@
     },
     "https": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "launchBrowser": false,
       "launchUrl": "https://localhost:8443/api/v1/swagger/index.html",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_Kestrel__Certificates__Default__Path": "C:/Users/lhajo/.aspnet/https/dev-cert.pfx",
+        "ASPNETCORE_Kestrel__Certificates__Default__Path": "%USERPROFILE%/.aspnet/https/dev-cert.pfx",
         "ASPNETCORE_Kestrel__Certificates__Default__Password": "YourSecurePassword123!"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "https://localhost:5443;http://localhost:8000"
+      "applicationUrl": "https://localhost:8443;http://localhost:8000"
     },
     "Container (Dockerfile)": {
       "commandName": "Docker",
@@ -31,7 +31,24 @@
       },
       "publishAllPorts": true,
       "useSSL": true
+    },
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_Kestrel__Certificates__Default__Path": "%USERPROFILE%/.aspnet/https/dev-cert.pfx",
+        "ASPNETCORE_Kestrel__Certificates__Default__Password": "YourSecurePassword123!"
+      }
     }
   },
-  "$schema": "https://json.schemastore.org/launchsettings.json"
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:8000/",
+      "sslPort": 8443
+    }
+  }
 }

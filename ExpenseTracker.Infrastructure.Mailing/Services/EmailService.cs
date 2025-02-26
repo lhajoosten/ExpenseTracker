@@ -1,6 +1,7 @@
 ﻿using ExpenseTracker.Common.Abstractions;
 using ExpenseTracker.Common.Models;
 using ExpenseTracker.Infrastructure.Mailing.Models;
+using ExpenseTracker.Infrastructure.Mailing.Templates;
 using MailKit.Security;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -20,7 +21,25 @@ namespace ExpenseTracker.Infrastructure.Mailing.Services
             ValidateEmailSettings();
         }
 
-        public async Task<Result> SendEmailAsync(string to, string subject, string body)
+        public async Task<Result> SendEmailConfirmationAsync(string email, string token)
+        {
+            var confirmationLink = $"https://localhost:4443/api/account/confirm-email?email={email}&confirmEmailToken={token}";
+            var subject = "Confirm your email address";
+            var body = EmailConfirmationTemplate.GenerateTemplate(email, confirmationLink);
+
+            return await SendEmailAsync(email, subject, body);
+        }
+
+        public async Task<Result> SendPasswordResetAsync(string email, string token)
+        {
+            var resetLink = $"https://localhost:4443/api/account/reset-password?email={email}&resetPasswordToken={token}";
+            var subject = "Password reset request";
+            var body = PasswordResetTemplate.GenerateTemplate(email, resetLink);
+
+            return await SendEmailAsync(email, subject, body);
+        }
+
+        private async Task<Result> SendEmailAsync(string to, string subject, string body)
         {
             try
             {
@@ -40,117 +59,6 @@ namespace ExpenseTracker.Infrastructure.Mailing.Services
                 _logger.LogError(ex, "Error sending email to {Email}", to);
                 return Result.Failure(new Dictionary<string, string> { { "Exception", ex.Message } });
             }
-        }
-
-        public async Task<Result> SendEmailConfirmationAsync(string email, string token)
-        {
-            var confirmationLink = $"https://localhost:5001/api/account/confirm-email?email={email}&token={token}";
-            var subject = "Confirm your email address";
-            var body = $@"
-                    <html>
-                    <head>
-                        <style>
-                            body {{
-                                font-family: Arial, sans-serif;
-                                line-height: 1.6;
-                            }}
-                            .container {{
-                                width: 80%;
-                                margin: auto;
-                                padding: 20px;
-                                border: 1px solid #ccc;
-                                border-radius: 10px;
-                                background-color: #f9f9f9;
-                            }}
-                            .header {{
-                                text-align: center;
-                                padding-bottom: 20px;
-                            }}
-                            .content {{
-                                margin-top: 20px;
-                            }}
-                            .footer {{
-                                margin-top: 30px;
-                                text-align: center;
-                                font-size: 0.9em;
-                                color: #777;
-                            }}
-                        </style>
-                    </head>
-                    <body>
-                        <div class='container'>
-                            <div class='header'>
-                                <h1>Email Confirmation</h1>
-                            </div>
-                            <div class='content'>
-                                <p>Dear User,</p>
-                                <p>Please confirm your email address by clicking the link below:</p>
-                                <p><a href='{confirmationLink}'>Confirm Email</a></p>
-                            </div>
-                            <div class='footer'>
-                                <p>Please do not reply to this email. This is an automated message.</p>
-                            </div>
-                        </div>
-                    </body>
-                    </html>";
-
-            return await SendEmailAsync(email, subject, body);
-        }
-
-        public Task<Result> SendPasswordResetAsync(string email, string token)
-        {
-            var resetLink = $"https://localhost:5001/api/account/reset-password?email={email}&token={token}";
-            var subject = "Password reset request";
-            var body = $@"
-                    <html>
-                    <head>
-                        <style>
-                            body {{
-                                font-family: Arial, sans-serif;
-                                line-height: 1.6;
-                            }}
-                            .container {{
-                                width: 80%;
-                                margin: auto;
-                                padding: 20px;
-                                border: 1px solid #ccc;
-                                border-radius: 10px;
-                                background-color: #f9f9f9;
-                            }}
-                            .header {{
-                                text-align: center;
-                                padding-bottom: 20px;
-                            }}
-                            .content {{
-                                margin-top: 20px;
-                            }}
-                            .footer {{
-                                margin-top: 30px;
-                                text-align: center;
-                                font-size: 0.9em;
-                                color: #777;
-                            }}
-                        </style>
-                    </head>
-                    <body>
-                        <div class='container'>
-                            <div class='header'>
-                                <h1>Password Reset</h1>
-                            </div>
-                            <div class='content'>
-                                <p>Dear User,</p>
-                                <p>We received a request to reset your password. If you did not make this request, please ignore this email.</p>
-                                <p>To reset your password, click the link below:</p>
-                                <p><a href='{resetLink}'>Reset Password</a></p>
-                            </div>
-                            <div class='footer'>
-                                <p>Please do not reply to this email. This is an automated message.</p>
-                            </div>
-                        </div>
-                    </body>
-                    </html>";
-
-            return SendEmailAsync(email, subject, body);
         }
 
         private MimeMessage CreateMimeMessage(string to, string subject, string body)
