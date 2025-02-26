@@ -1,14 +1,19 @@
-import { ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
-import { BrowserModule } from '@angular/platform-browser';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+
+import { coreConfig } from './core/core.config';
+import { sharedConfig } from './shared/shared.config';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    importProvidersFrom(BrowserModule),
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes), provideAnimationsAsync()
+    provideRouter(routes), provideAnimationsAsync(),
+
+    // Merge the providers from coreConfig and sharedConfig
+    ...coreConfig.providers,
+    ...sharedConfig.providers
   ],
 };
