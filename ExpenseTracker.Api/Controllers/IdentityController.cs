@@ -1,15 +1,19 @@
 ﻿using ExpenseTracker.Common.Abstractions;
 using ExpenseTracker.Common.Models;
+using ExpenseTracker.Infrastructure.Identity.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ExpenseTracker.Api.Controllers
 {
     [Route("api/auth")]
     [ApiController]
-    public class IdentityController(IAuthService authService) : ControllerBase
+    public class IdentityController(IAuthService authService, UserManager<AppUser> userManager) : ControllerBase
     {
         private readonly IAuthService _authService = authService;
+        private readonly UserManager<AppUser> _userManager = userManager;
 
         [HttpPost("signup")]
         public async Task<IActionResult> SignUp([FromBody] SignUpRequest request)
@@ -32,6 +36,44 @@ namespace ExpenseTracker.Api.Controllers
             }
             return Ok();
         }
+
+        [HttpGet("status")]
+        public async Task<IActionResult> CheckAuthStatus()
+        {
+            // Check if user is authenticated
+            if (!User.Identity!.IsAuthenticated)
+            {
+                return Ok(new { success = false });
+            }
+
+            // Get the current user
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _userManager.FindByIdAsync(userId!);
+
+            if (user == null)
+            {
+                return Ok(new { success = false });
+            }
+
+            // Get user roles
+            var roles = await _userManager.GetRolesAsync(user);
+
+            // Create response object that matches your Angular interface
+            var userResponse = new
+            {
+                id = user.Id,
+                email = user.Email,
+                displayName = user.UserName,
+                roles = roles.ToArray()
+            };
+
+            return Ok(new
+            {
+                success = true,
+                user = userResponse
+            });
+        }
+
 
         [Authorize]
         [HttpGet("current")]
