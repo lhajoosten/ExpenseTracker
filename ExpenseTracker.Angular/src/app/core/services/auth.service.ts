@@ -5,21 +5,10 @@ import { Router } from '@angular/router';
 import { catchError, map, tap } from 'rxjs/operators';
 import { LoggerService } from './logger.service';
 import { environment } from '../../../environments/environment';
+import { User } from '../models/user.models';
+import { AuthResponse, LoginCredentials, RegisterCredentials } from '../models/auth.models';
 
-export interface User {
-    id: string;
-    email: string;
-    displayName?: string;
-    photoUrl?: string;
-    roles?: string[];
-    // Add other user properties as needed
-}
 
-export interface AuthResponse {
-    success: boolean;
-    user?: User;
-    message?: string;
-}
 
 @Injectable({
     providedIn: 'root',
@@ -62,8 +51,8 @@ export class AuthService {
     }
 
     // Login with email/password
-    login(email: string, password: string): Observable<User> {
-        return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, { email, password })
+    login(userData: Partial<LoginCredentials>): Observable<User> {
+        return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, userData)
             .pipe(
                 map(response => {
                     if (response.success && response.user) {
@@ -101,7 +90,7 @@ export class AuthService {
     }
 
     // Register
-    register(userData: Partial<User>): Observable<User> {
+    register(userData: Partial<RegisterCredentials>): Observable<User> {
         return this.http.post<AuthResponse>(`${this.apiUrl}/auth/register`, userData)
             .pipe(
                 map(response => {
@@ -122,12 +111,14 @@ export class AuthService {
 
     // Initiate GitHub OAuth login
     loginWithGithub(): void {
-        window.location.href = `${this.apiUrl}/auth/github`;
+        const returnUrl = this.router.url;
+        window.location.href = `${this.apiUrl}/oauth/login?provider=GitHub&returnUrl=${encodeURIComponent(returnUrl)}`;
     }
 
     // Initiate Microsoft Entra ID login
     loginWithMicrosoft(): void {
-        window.location.href = `${this.apiUrl}/auth/microsoft`;
+        const returnUrl = this.router.url;
+        window.location.href = `${this.apiUrl}/oauth/login?provider=Microsoft&returnUrl=${encodeURIComponent(returnUrl)}`;
     }
 
     // Helper methods

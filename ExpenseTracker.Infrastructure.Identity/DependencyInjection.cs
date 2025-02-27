@@ -17,12 +17,25 @@ namespace ExpenseTracker.Infrastructure.Identity
     {
         public static IServiceCollection AddIdentityService(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<ETIdentityContext>(options =>
-                options.UseSqlServer(
-                    configuration.GetConnectionString("DevelopmentConnection"),
-                    b => b.MigrationsAssembly(typeof(ETIdentityContext).Assembly.FullName)
-                )
-            );
+            var env = configuration["ASPNETCORE_ENVIRONMENT"];
+            if (env == "Development")
+            {
+                services.AddDbContext<ETIdentityContext>(options =>
+                    options.UseSqlServer(
+                        configuration.GetConnectionString("DevelopmentConnection"),
+                        b => b.MigrationsAssembly(typeof(ETIdentityContext).Assembly.FullName)
+                    )
+                );
+            }
+            else
+            {
+                services.AddDbContext<ETIdentityContext>(options =>
+                    options.UseSqlServer(
+                        configuration.GetConnectionString("ProductionConnection"),
+                        b => b.MigrationsAssembly(typeof(ETIdentityContext).Assembly.FullName)
+                    )
+                );
+            }
 
             services.AddIdentity(configuration);
             services.AddAuthServices(configuration);

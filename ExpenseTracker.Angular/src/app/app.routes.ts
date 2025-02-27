@@ -25,4 +25,7 @@ export const routes: Routes = [
 
     // Redirect to dashboard
     { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+
+    // Not found
+    { path: '**', loadComponent: () => import('./shared/pages/not-found/not-found.component').then(m => m.NotFoundComponent) },
 ];
