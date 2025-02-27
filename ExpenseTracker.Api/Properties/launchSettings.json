@@ -5,7 +5,8 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_Kestrel__Certificates__Default__Path": "%USERPROFILE%/.aspnet/https/dev-cert.pfx",
-        "ASPNETCORE_Kestrel__Certificates__Default__Password": "YourSecurePassword123!"
+        "ASPNETCORE_Kestrel__Certificates__Default__Password": "YourSecurePassword123!",
+        "VaultUri": "https://expensetracker-vault.vault.azure.net/"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:8000"
@@ -17,7 +18,8 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_Kestrel__Certificates__Default__Path": "%USERPROFILE%/.aspnet/https/dev-cert.pfx",
-        "ASPNETCORE_Kestrel__Certificates__Default__Password": "YourSecurePassword123!"
+        "ASPNETCORE_Kestrel__Certificates__Default__Password": "YourSecurePassword123!",
+        "VaultUri": "https://expensetracker-vault.vault.azure.net/"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:8443;http://localhost:8000"
@@ -27,7 +29,8 @@
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/v1/swagger",
       "environmentVariables": {
         "ASPNETCORE_HTTPS_PORTS": "8443",
-        "ASPNETCORE_HTTP_PORTS": "8000"
+        "ASPNETCORE_HTTP_PORTS": "8000",
+        "VaultUri": "https://expensetracker-vault.vault.azure.net/"
       },
       "publishAllPorts": true,
       "useSSL": true
@@ -38,7 +41,8 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_Kestrel__Certificates__Default__Path": "%USERPROFILE%/.aspnet/https/dev-cert.pfx",
-        "ASPNETCORE_Kestrel__Certificates__Default__Password": "YourSecurePassword123!"
+        "ASPNETCORE_Kestrel__Certificates__Default__Password": "YourSecurePassword123!",
+        "VaultUri": "https://expensetracker-vault.vault.azure.net/"
       }
     }
   },
