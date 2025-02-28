@@ -6,9 +6,11 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { LoggerService } from './logger.service';
 import { environment } from '../../../environments/environment';
 import { User } from '../models/user.models';
-import { AuthResponse, LoginCredentials, RegisterCredentials } from '../models/auth.models';
-
-
+import {
+    AuthResponse,
+    LoginCredentials,
+    RegisterCredentials,
+} from '../models/auth.models';
 
 @Injectable({
     providedIn: 'root',
@@ -24,37 +26,37 @@ export class AuthService {
     constructor(
         private http: HttpClient,
         private router: Router,
-        private logger: LoggerService
+        private logger: LoggerService,
     ) {
         this.checkAuthStatus();
     }
 
     // Check if user is already authenticated (cookies will be sent automatically)
     checkAuthStatus(): Observable<boolean> {
-        return this.http.get<AuthResponse>(`${this.apiUrl}/auth/status`)
-            .pipe(
-                tap(response => {
-                    if (response.success && response.user) {
-                        this.currentUserSubject.next(response.user);
-                        this.logger.info('User authenticated', response.user);
-                    } else {
-                        this.currentUserSubject.next(null);
-                    }
-                }),
-                map(response => response.success),
-                catchError(error => {
-                    this.logger.error('Auth status check failed', error);
+        return this.http.get<AuthResponse>(`${this.apiUrl}/auth/status`).pipe(
+            tap((response) => {
+                if (response.success && response.user) {
+                    this.currentUserSubject.next(response.user);
+                    this.logger.info('User authenticated', response.user);
+                } else {
                     this.currentUserSubject.next(null);
-                    return of(false);
-                })
-            );
+                }
+            }),
+            map((response) => response.success),
+            catchError((error) => {
+                this.logger.error('Auth status check failed', error);
+                this.currentUserSubject.next(null);
+                return of(false);
+            }),
+        );
     }
 
     // Login with email/password
     login(userData: Partial<LoginCredentials>): Observable<User> {
-        return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, userData)
+        return this.http
+            .post<AuthResponse>(`${this.apiUrl}/auth/signin`, userData)
             .pipe(
-                map(response => {
+                map((response) => {
                     if (response.success && response.user) {
                         this.currentUserSubject.next(response.user);
                         this.logger.info('User logged in', response.user);
@@ -63,62 +65,70 @@ export class AuthService {
                         throw new Error(response.message || 'Login failed');
                     }
                 }),
-                catchError(error => {
+                catchError((error) => {
                     this.logger.error('Login failed', error);
                     return throwError(() => error);
-                })
+                }),
             );
     }
 
     // Logout
     logout(): Observable<boolean> {
-        return this.http.post<AuthResponse>(`${this.apiUrl}/auth/logout`, {})
+        return this.http
+            .post<AuthResponse>(`${this.apiUrl}/auth/signout`, {})
             .pipe(
                 tap(() => {
                     this.currentUserSubject.next(null);
-                    this.router.navigate(['/auth/login']);
+                    this.router.navigate(['/auth/signin']);
                     this.logger.info('User logged out');
                 }),
-                map(response => response.success),
-                catchError(error => {
+                map((response) => response.success),
+                catchError((error) => {
                     this.logger.error('Logout failed', error);
                     // Even if server logout fails, clear local state
                     this.currentUserSubject.next(null);
                     return of(false);
-                })
+                }),
             );
     }
 
     // Register
     register(userData: Partial<RegisterCredentials>): Observable<User> {
-        return this.http.post<AuthResponse>(`${this.apiUrl}/auth/register`, userData)
+        return this.http
+            .post<AuthResponse>(`${this.apiUrl}/auth/signup`, userData)
             .pipe(
-                map(response => {
+                map((response) => {
                     if (response.success && response.user) {
                         this.currentUserSubject.next(response.user);
-                        this.logger.info('User registered and logged in', response.user);
+                        this.logger.info(
+                            'User registered and logged in',
+                            response.user,
+                        );
                         return response.user;
                     } else {
-                        throw new Error(response.message || 'Registration failed');
+                        throw new Error(
+                            response.message || 'Registration failed',
+                        );
                     }
                 }),
-                catchError(error => {
+                catchError((error) => {
                     this.logger.error('Registration failed', error);
                     return throwError(() => error);
-                })
+                }),
             );
     }
 
-    // Initiate GitHub OAuth login
-    loginWithGithub(): void {
-        const returnUrl = this.router.url;
-        window.location.href = `${this.apiUrl}/oauth/login?provider=GitHub&returnUrl=${encodeURIComponent(returnUrl)}`;
-    }
-
-    // Initiate Microsoft Entra ID login
-    loginWithMicrosoft(): void {
-        const returnUrl = this.router.url;
-        window.location.href = `${this.apiUrl}/oauth/login?provider=Microsoft&returnUrl=${encodeURIComponent(returnUrl)}`;
+    // Get current user profile
+    getCurrentUser(): Observable<User> {
+        return this.http.get<User>(`${this.apiUrl}/auth/current`).pipe(
+            tap((user) => {
+                this.currentUserSubject.next(user);
+            }),
+            catchError((error) => {
+                this.logger.error('Failed to get current user', error);
+                return throwError(() => error);
+            }),
+        );
     }
 
     // Helper methods

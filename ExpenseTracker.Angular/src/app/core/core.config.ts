@@ -13,7 +13,7 @@ export const coreConfig: ApplicationConfig = {
     providers: [
         // Provide HttpClient with interceptors
         provideHttpClient(
-            withInterceptors([AuthInterceptor, HttpErrorInterceptor])
+            withInterceptors([AuthInterceptor, HttpErrorInterceptor]),
         ),
         // Provide routing
         provideRouter(routes),
@@ -23,6 +23,6 @@ export const coreConfig: ApplicationConfig = {
         // Core services
         AuthService,
         LoggerService,
-        HttpErrorService
+        HttpErrorService,
     ],
 };

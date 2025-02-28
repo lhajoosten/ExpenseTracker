@@ -20,10 +20,12 @@ namespace ExpenseTracker.Infrastructure.Identity.Data
             builder.Entity<AppRole>(entity => { entity.ToTable(name: "Role"); });
             builder.Entity<AppUser>(entity => { entity.ToTable(name: "User"); });
             builder.Entity<IdentityUserRole<Guid>>(entity => { entity.ToTable("UserRole"); });
-            builder.Entity<IdentityUserClaim<Guid>>(entity => { entity.ToTable("UserClaim"); });
-            builder.Entity<IdentityRoleClaim<Guid>>(entity => { entity.ToTable("RoleClaim"); });
             builder.Entity<IdentityUserLogin<Guid>>(entity => { entity.ToTable("UserLogin"); });
-            builder.Entity<IdentityUserToken<Guid>>(entity => { entity.ToTable("UserToken"); });
+
+            // Ignoring the following tables
+            builder.Ignore<IdentityUserClaim<Guid>>();
+            builder.Ignore<IdentityRoleClaim<Guid>>();
+            builder.Ignore<IdentityUserToken<Guid>>();
         }
     }
 }

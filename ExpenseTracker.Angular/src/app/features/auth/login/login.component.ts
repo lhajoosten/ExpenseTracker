@@ -1,69 +1,109 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import {
+    FormBuilder,
+    FormGroup,
+    ReactiveFormsModule,
+    Validators,
+} from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { OAuthService } from '../../../core/services/oauth.service';
+import { CommonModule } from '@angular/common';
 import { materialModules } from '../../../shared/shared.config';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss'],
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    materialModules
-  ]
+    selector: 'app-login',
+    templateUrl: './login.component.html',
+    styleUrls: ['./login.component.scss'],
+    imports: [CommonModule, materialModules, ReactiveFormsModule],
 })
 export class LoginComponent implements OnInit {
-  loginForm: FormGroup;
-  hidePassword = true;
+    loginForm: FormGroup;
+    hidePassword = true;
+    loading = false;
+    submitted = false;
+    errorMessage: string | null = null;
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    protected router: Router
-  ) {
-    this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(8)]]
-    });
-  }
-
-  ngOnInit(): void {
-    // Check if already logged in
-    if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/']);
+    constructor(
+        private formBuilder: FormBuilder,
+        private router: Router,
+        private route: ActivatedRoute,
+        private authService: AuthService,
+        private oauthService: OAuthService,
+        private snackBar: MatSnackBar,
+    ) {
+        this.loginForm = this.formBuilder.group({
+            email: ['', [Validators.required, Validators.email]],
+            password: ['', [Validators.required, Validators.minLength(6)]],
+            rememberMe: [false],
+        });
     }
-  }
 
-  onSubmit(): void {
-    if (this.loginForm.valid) {
-      const { email, password } = this.loginForm.value;
-      this.authService.login({ email, password }).subscribe({
-        next: () => {
-          // Redirect to the intended URL or home
-          const redirectUrl = this.authService.redirectUrl || '/';
-          this.router.navigate([redirectUrl]);
-        },
-        error: (error) => {
-          // Handle login error (you might want to show a snackbar or error message)
-          console.error('Login failed:', error);
+    ngOnInit(): void {
+        // Get return URL from route parameters or set default
+        const returnUrl =
+            this.route.snapshot.queryParamMap.get('returnUrl') || '/';
+        this.authService.redirectUrl = returnUrl;
+
+        // Check if there's an error message
+        const error = this.route.snapshot.queryParamMap.get('error');
+        if (error) {
+            this.errorMessage = decodeURIComponent(error);
+            this.snackBar.open(this.errorMessage, 'Close', {
+                duration: 5000,
+                panelClass: ['error-snackbar'],
+            });
         }
-      });
     }
-  }
 
-  loginWithGithub(): void {
-    this.authService.loginWithGithub();
-  }
+    onSubmit(): void {
+        if (this.loginForm.invalid) {
+            return;
+        }
 
-  loginWithMicrosoft(): void {
-    this.authService.loginWithMicrosoft();
-  }
+        this.loading = true;
+        this.errorMessage = null;
 
-  navigateToRegister(): void {
-    this.router.navigate(['/auth/register']);
-  }
+        this.authService
+            .login({
+                email: this.loginForm.value.email,
+                password: this.loginForm.value.password,
+                rememberMe: this.loginForm.value.rememberMe,
+            })
+            .subscribe({
+                next: () => {
+                    const returnUrl = this.authService.redirectUrl || '/';
+                    this.router.navigateByUrl(returnUrl);
+                    this.snackBar.open('Login successful', 'Close', {
+                        duration: 3000,
+                        panelClass: ['success-snackbar'],
+                    });
+                },
+                error: (error) => {
+                    this.errorMessage = error.message || 'Invalid credentials';
+                    this.snackBar.open(
+                        this.errorMessage != null ? this.errorMessage : '',
+                        'Close',
+                        {
+                            duration: 5000,
+                            panelClass: ['error-snackbar'],
+                        },
+                    );
+                    this.loading = false;
+                },
+            });
+    }
+
+    loginWithGithub(): void {
+        this.oauthService.loginWithGithub();
+    }
+
+    loginWithMicrosoft(): void {
+        this.oauthService.loginWithMicrosoft();
+    }
+
+    navigateToRegister(): void {
+        this.router.navigate(['/auth/register']);
+    }
 }

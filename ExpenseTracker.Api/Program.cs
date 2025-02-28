@@ -2,6 +2,8 @@ using Azure.Identity;
 using ExpenseTracker.Infrastructure.Identity;
 using ExpenseTracker.Infrastructure.Identity.Seeding;
 using ExpenseTracker.Infrastructure.Mailing;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.OpenApi.Models;
 
@@ -23,12 +25,25 @@ namespace ExpenseTracker.Api
                 });
             });
 
-            string keyVaultUri = builder.Configuration["VaultUri"]!;
-            if (!string.IsNullOrEmpty(keyVaultUri))
+            if (builder.Environment.IsProduction())
             {
-                var credential = new DefaultAzureCredential();
-                builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUri), credential);
+                string keyVaultUri = builder.Configuration["VaultUri"]!;
+                if (!string.IsNullOrEmpty(keyVaultUri))
+                {
+                    var credential = new DefaultAzureCredential();
+                    builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUri), credential);
+                }
             }
+
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromDays(7);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SameSite = SameSiteMode.None;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.Cookie.IsEssential = true;
+            });
 
             // Register Identity
             services.AddIdentityService(configuration);
@@ -79,6 +94,17 @@ namespace ExpenseTracker.Api
                 c.AddServer(new OpenApiServer { Url = "https://localhost:8443" });
             });
 
+            services.AddCors(options =>
+            {
+                options.AddPolicy("ClientCorsPolicy", policy =>
+                {
+                    policy.WithOrigins("https://localhost:4443")
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials(); // This is critical for cookies
+                });
+            });
+
             var app = builder.Build();
 
             // Use custom exception middleware
@@ -96,15 +122,6 @@ namespace ExpenseTracker.Api
 
             app.Services.SeedIdentityDataAsync().GetAwaiter().GetResult();
 
-            // Use the CORS policy
-            app.UseCors(options =>
-            {
-                options.WithOrigins(["https://localhost:4443"]);
-                options.AllowAnyMethod();
-                options.AllowAnyHeader();
-                options.AllowCredentials();
-            });
-
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -117,16 +134,30 @@ namespace ExpenseTracker.Api
                     c.SwaggerEndpoint("/api/v1/swagger/v1/swagger.json", "ExpenseTracker.Api v1");
                     c.RoutePrefix = "api/v1/swagger";
                 });
+                app.UseDeveloperExceptionPage();
             }
-
-            // Configure middleware pipeline
-            if (!app.Environment.IsDevelopment())
+            else
             {
                 app.UseHsts();
             }
 
+            app.UseSession();
+
+            app.UseCookiePolicy(new CookiePolicyOptions
+            {
+                MinimumSameSitePolicy = SameSiteMode.Lax,
+                Secure = CookieSecurePolicy.Always,
+                HttpOnly = HttpOnlyPolicy.Always
+            });
+
             // Use Https Redirection to enforce HTTPS
             app.UseHttpsRedirection();
+
+            // Use Routing
+            app.UseRouting();
+
+            // Use the CORS policy
+            app.UseCors("ClientCorsPolicy");
 
             // Use Authentication & Authorization
             app.UseAuthentication();

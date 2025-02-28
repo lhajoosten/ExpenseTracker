@@ -3,7 +3,7 @@ import { Router, NavigationEnd, Event, ActivatedRoute } from '@angular/router';
 import { filter } from 'rxjs/operators';
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class NavigationHistoryService {
     private history: string[] = [];
@@ -12,29 +12,37 @@ export class NavigationHistoryService {
 
     constructor(private router: Router) {
         // Subscribe to router events to track navigation
-        this.router.events.pipe(
-            filter((event: Event): event is NavigationEnd => event instanceof NavigationEnd)
-        ).subscribe((event: NavigationEnd) => {
-            // Store URL without query parameters
-            const url = this.cleanUrl(event.urlAfterRedirects);
+        this.router.events
+            .pipe(
+                filter(
+                    (event: Event): event is NavigationEnd =>
+                        event instanceof NavigationEnd,
+                ),
+            )
+            .subscribe((event: NavigationEnd) => {
+                // Store URL without query parameters
+                const url = this.cleanUrl(event.urlAfterRedirects);
 
-            // Skip adding ignored paths to history
-            if (this.shouldIgnoreUrl(url)) {
-                return;
-            }
+                // Skip adding ignored paths to history
+                if (this.shouldIgnoreUrl(url)) {
+                    return;
+                }
 
-            // Only add to history if it's not the same as the last entry
-            if (this.history.length === 0 || this.history[this.history.length - 1] !== url) {
-                this.addToHistory(url);
-            }
-        });
+                // Only add to history if it's not the same as the last entry
+                if (
+                    this.history.length === 0 ||
+                    this.history[this.history.length - 1] !== url
+                ) {
+                    this.addToHistory(url);
+                }
+            });
     }
 
     /**
      * Check if URL should be ignored in history
      */
     private shouldIgnoreUrl(url: string): boolean {
-        return this.ignoredPaths.some(path => url.includes(path));
+        return this.ignoredPaths.some((path) => url.includes(path));
     }
 
     /**

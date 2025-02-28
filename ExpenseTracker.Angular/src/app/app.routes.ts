@@ -6,7 +6,11 @@ import { AdminComponent } from './features/admin/admin.component';
 
 export const routes: Routes = [
     // Public routes
-    { path: 'auth', loadChildren: () => import('./features/auth/auth.routes').then(m => m.routes) },
+    {
+        path: 'auth',
+        loadChildren: () =>
+            import('./features/auth/auth.routes').then((m) => m.routes),
+    },
 
     // Protected routes
     {
@@ -27,5 +31,11 @@ export const routes: Routes = [
     { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 
     // Not found
-    { path: '**', loadComponent: () => import('./shared/pages/not-found/not-found.component').then(m => m.NotFoundComponent) },
+    {
+        path: '**',
+        loadComponent: () =>
+            import('./shared/pages/not-found/not-found.component').then(
+                (m) => m.NotFoundComponent,
+            ),
+    },
 ];

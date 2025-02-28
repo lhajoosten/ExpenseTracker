@@ -10,10 +10,11 @@ namespace ExpenseTracker.Api.Controllers
 {
     [Route("api/auth")]
     [ApiController]
-    public class IdentityController(IAuthService authService, UserManager<AppUser> userManager) : ControllerBase
+    public class IdentityController(IAuthService authService, UserManager<AppUser> userManager, SignInManager<AppUser> signInManager) : ControllerBase
     {
         private readonly IAuthService _authService = authService;
         private readonly UserManager<AppUser> _userManager = userManager;
+        private readonly SignInManager<AppUser> _signInManager = signInManager;
 
         [HttpPost("signup")]
         public async Task<IActionResult> SignUp([FromBody] SignUpRequest request)
@@ -36,44 +37,6 @@ namespace ExpenseTracker.Api.Controllers
             }
             return Ok();
         }
-
-        [HttpGet("status")]
-        public async Task<IActionResult> CheckAuthStatus()
-        {
-            // Check if user is authenticated
-            if (!User.Identity!.IsAuthenticated)
-            {
-                return Ok(new { success = false });
-            }
-
-            // Get the current user
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var user = await _userManager.FindByIdAsync(userId!);
-
-            if (user == null)
-            {
-                return Ok(new { success = false });
-            }
-
-            // Get user roles
-            var roles = await _userManager.GetRolesAsync(user);
-
-            // Create response object that matches your Angular interface
-            var userResponse = new
-            {
-                id = user.Id,
-                email = user.Email,
-                displayName = user.UserName,
-                roles = roles.ToArray()
-            };
-
-            return Ok(new
-            {
-                success = true,
-                user = userResponse
-            });
-        }
-
 
         [Authorize]
         [HttpGet("current")]
@@ -170,6 +133,125 @@ namespace ExpenseTracker.Api.Controllers
                 return BadRequest(result.Errors);
             }
             return Ok(result.Value);
+        }
+
+        [HttpGet("status")]
+        public async Task<IActionResult> CheckAuthStatus()
+        {
+            try
+            {
+                if (!User.Identity!.IsAuthenticated)
+                {
+                    return Ok(new { success = false });
+                }
+
+                // More robust user lookup
+                var nameIdentifier = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var email = User.FindFirstValue(ClaimTypes.Email);
+
+                // Try to find user by external login first
+                var user = await FindUserByExternalLogin(nameIdentifier);
+
+                // If not found, try by email
+                if (user == null && !string.IsNullOrEmpty(email))
+                {
+                    user = await _userManager.FindByEmailAsync(email);
+                }
+
+                if (user == null)
+                {
+                    // Attempt to create user if not exists
+                    user = await CreateUserFromClaims();
+                }
+
+                if (user == null)
+                {
+                    // Force sign out if no user can be found or created
+                    await _signInManager.SignOutAsync();
+                    return Ok(new { success = false });
+                }
+
+                var roles = await _userManager.GetRolesAsync(user);
+
+                var userResponse = new
+                {
+                    id = user.Id.ToString(),
+                    email = user.Email,
+                    displayName = !string.IsNullOrEmpty(user.UserName) ? user.UserName : user.Email,
+                    firstName = user.FirstName,
+                    lastName = user.LastName,
+                    roles = roles.ToArray()
+                };
+
+                return Ok(new
+                {
+                    success = true,
+                    user = userResponse
+                });
+            }
+            catch (Exception ex)
+            {
+                // Log the full exception
+                Console.WriteLine($"Detailed Error in CheckAuthStatus: {ex}");
+                return Ok(new { success = false, error = ex.Message });
+            }
+        }
+
+        private async Task<AppUser> FindUserByExternalLogin(string nameIdentifier)
+        {
+            if (string.IsNullOrEmpty(nameIdentifier))
+                return null;
+
+            var users = _userManager.Users.ToList();
+            foreach (var user in users)
+            {
+                var logins = await _userManager.GetLoginsAsync(user);
+                if (logins.Any(l => l.ProviderKey == nameIdentifier))
+                {
+                    return user;
+                }
+            }
+            return null;
+        }
+
+        private async Task<AppUser> CreateUserFromClaims()
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var firstName = User.FindFirstValue(ClaimTypes.GivenName);
+            var lastName = User.FindFirstValue(ClaimTypes.Surname);
+            var nameIdentifier = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(email))
+                return null;
+
+            var user = new AppUser
+            {
+                UserName = email,
+                Email = email,
+                EmailConfirmed = true,
+                FirstName = firstName ?? "",
+                LastName = lastName ?? ""
+            };
+
+            var createResult = await _userManager.CreateAsync(user);
+            if (!createResult.Succeeded)
+            {
+                Console.WriteLine($"Failed to create user: {string.Join(", ", createResult.Errors.Select(e => e.Description))}");
+                return null;
+            }
+
+            // If we have a name identifier, add the external login
+            if (!string.IsNullOrEmpty(nameIdentifier))
+            {
+                var loginInfo = new UserLoginInfo("Microsoft", nameIdentifier, null);
+                var addLoginResult = await _userManager.AddLoginAsync(user, loginInfo);
+                if (!addLoginResult.Succeeded)
+                {
+                    Console.WriteLine($"Failed to add external login: {string.Join(", ", addLoginResult.Errors.Select(e => e.Description))}");
+                }
+            }
+
+            return user;
         }
     }
 }

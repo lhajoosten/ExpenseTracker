@@ -1,127 +1,240 @@
 <div class="register-container">
-    <div class="register-background"></div>
     <mat-card class="register-card">
-        <div class="brand-logo">
-            <mat-icon>person_add</mat-icon>
-        </div>
-
         <mat-card-header>
             <mat-card-title>Create Account</mat-card-title>
-            <mat-card-subtitle>Sign up to start tracking your expenses</mat-card-subtitle>
+            <mat-card-subtitle>Join us today</mat-card-subtitle>
         </mat-card-header>
 
         <mat-card-content>
-            <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-                <div class="form-field">
-                    <mat-form-field appearance="outline">
+            <form
+                [formGroup]="registerForm"
+                (ngSubmit)="onSubmit()"
+                class="register-form"
+            >
+                <!-- First Name and Last Name Fields -->
+                <div class="name-fields">
+                    <mat-form-field appearance="outline" class="half-width">
                         <mat-label>First Name</mat-label>
-                        <input matInput formControlName="firstName" placeholder="Enter your first name">
-                        <mat-icon matSuffix>person</mat-icon>
-                        <mat-error *ngIf="registerForm.get('firstName')?.hasError('required')">
+                        <input matInput formControlName="firstName" required />
+                        <mat-icon matPrefix>person</mat-icon>
+                        <mat-error
+                            *ngIf="
+                                registerForm
+                                    .get('firstName')
+                                    ?.hasError('required')
+                            "
+                        >
                             First name is required
                         </mat-error>
-                        <mat-error *ngIf="registerForm.get('firstName')?.hasError('minlength')">
-                            First name must be at least 3 characters
-                        </mat-error>
                     </mat-form-field>
-                </div>
 
-                <div class="form-field">
-                    <mat-form-field appearance="outline">
+                    <mat-form-field appearance="outline" class="half-width">
                         <mat-label>Last Name</mat-label>
-                        <input matInput formControlName="lastName" placeholder="Enter your last name">
-                        <mat-icon matSuffix>person</mat-icon>
-                        <mat-error *ngIf="registerForm.get('lastName')?.hasError('required')">
+                        <input matInput formControlName="lastName" required />
+                        <mat-icon matPrefix>person</mat-icon>
+                        <mat-error
+                            *ngIf="
+                                registerForm
+                                    .get('lastName')
+                                    ?.hasError('required')
+                            "
+                        >
                             Last name is required
                         </mat-error>
-                        <mat-error *ngIf="registerForm.get('lastName')?.hasError('minlength')">
-                            Last name must be at least 3 characters
-                        </mat-error>
                     </mat-form-field>
                 </div>
 
-                <div class="form-field">
-                    <mat-form-field appearance="outline">
-                        <mat-label>Email</mat-label>
-                        <input matInput type="email" formControlName="email" placeholder="Enter your email">
-                        <mat-icon matSuffix>email</mat-icon>
-                        <mat-error *ngIf="registerForm.get('email')?.hasError('required')">
-                            Email is required
-                        </mat-error>
-                        <mat-error *ngIf="registerForm.get('email')?.hasError('email')">
-                            Please enter a valid email address
-                        </mat-error>
-                    </mat-form-field>
-                </div>
+                <!-- Email Field -->
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Email</mat-label>
+                    <input
+                        matInput
+                        type="email"
+                        formControlName="email"
+                        placeholder="your.email@example.com"
+                        required
+                    />
+                    <mat-icon matPrefix>email</mat-icon>
+                    <mat-error
+                        *ngIf="registerForm.get('email')?.hasError('required')"
+                    >
+                        Email is required
+                    </mat-error>
+                    <mat-error
+                        *ngIf="registerForm.get('email')?.hasError('email')"
+                    >
+                        Please enter a valid email address
+                    </mat-error>
+                </mat-form-field>
 
-                <div class="form-field">
-                    <mat-form-field appearance="outline">
-                        <mat-label>Password</mat-label>
-                        <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password">
-                        <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button">
-                            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
-                        </button>
-                        <mat-error *ngIf="registerForm.get('password')?.hasError('required')">
-                            Password is required
-                        </mat-error>
-                        <mat-error *ngIf="registerForm.get('password')?.hasError('minlength')">
-                            Password must be at least 8 characters
-                        </mat-error>
-                    </mat-form-field>
-                </div>
-
-                <div class="form-field">
-                    <mat-form-field appearance="outline">
-                        <mat-label>Confirm Password</mat-label>
-                        <input matInput [type]="hideConfirmPassword ? 'password' : 'text'"
-                            formControlName="confirmPassword">
-                        <button mat-icon-button matSuffix (click)="hideConfirmPassword = !hideConfirmPassword"
-                            type="button">
-                            <mat-icon>{{hideConfirmPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
-                        </button>
-                        <mat-error *ngIf="registerForm.hasError('mismatch')">
-                            Passwords do not match
-                        </mat-error>
-                    </mat-form-field>
-                </div>
-
-                <div class="form-actions">
-                    <button mat-flat-button color="primary" type="submit" [disabled]="registerForm.invalid"
-                        class="submit-button">
-                        <span>Create Account</span>
-                        <mat-icon>arrow_forward</mat-icon>
+                <!-- Password Field -->
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Password</mat-label>
+                    <input
+                        matInput
+                        [type]="hidePassword ? 'password' : 'text'"
+                        formControlName="password"
+                        required
+                    />
+                    <mat-icon matPrefix>lock</mat-icon>
+                    <button
+                        mat-icon-button
+                        matSuffix
+                        (click)="hidePassword = !hidePassword"
+                        [attr.aria-label]="'Hide password'"
+                        [attr.aria-pressed]="hidePassword"
+                        type="button"
+                    >
+                        <mat-icon>{{
+                            hidePassword ? "visibility_off" : "visibility"
+                        }}</mat-icon>
                     </button>
+                    <mat-error>{{ getPasswordErrorMessage() }}</mat-error>
+                    <mat-hint
+                        >Password must contain at least 8 characters including
+                        uppercase, lowercase, number and special
+                        character</mat-hint
+                    >
+                </mat-form-field>
+
+                <!-- Confirm Password Field -->
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Confirm Password</mat-label>
+                    <input
+                        matInput
+                        [type]="hideConfirmPassword ? 'password' : 'text'"
+                        formControlName="confirmPassword"
+                        required
+                    />
+                    <mat-icon matPrefix>lock</mat-icon>
+                    <button
+                        mat-icon-button
+                        matSuffix
+                        (click)="hideConfirmPassword = !hideConfirmPassword"
+                        [attr.aria-label]="'Hide password'"
+                        [attr.aria-pressed]="hideConfirmPassword"
+                        type="button"
+                    >
+                        <mat-icon>{{
+                            hideConfirmPassword
+                                ? "visibility_off"
+                                : "visibility"
+                        }}</mat-icon>
+                    </button>
+                    <mat-error
+                        *ngIf="
+                            registerForm
+                                .get('confirmPassword')
+                                ?.hasError('required')
+                        "
+                    >
+                        Please confirm your password
+                    </mat-error>
+                    <mat-error
+                        *ngIf="
+                            registerForm
+                                .get('confirmPassword')
+                                ?.hasError('passwordMismatch')
+                        "
+                    >
+                        Passwords do not match
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Terms & Conditions Checkbox -->
+                <div class="terms-checkbox">
+                    <mat-checkbox
+                        formControlName="acceptTerms"
+                        color="primary"
+                        required
+                    >
+                        I accept the
+                        <a href="/terms" class="terms-link"
+                            >Terms & Conditions</a
+                        >
+                        and
+                        <a href="/privacy" class="terms-link">Privacy Policy</a>
+                    </mat-checkbox>
+                    <mat-error
+                        *ngIf="
+                            registerForm.get('acceptTerms')?.touched &&
+                            registerForm
+                                .get('acceptTerms')
+                                ?.hasError('required')
+                        "
+                    >
+                        You must accept the terms and conditions to continue
+                    </mat-error>
                 </div>
 
-                <div class="social-divider">
-                    <mat-divider></mat-divider>
-                    <span>or sign up with</span>
-                    <mat-divider></mat-divider>
+                <!-- Error Message -->
+                <div *ngIf="errorMessage" class="error-message">
+                    <mat-icon>error</mat-icon>
+                    <span>{{ errorMessage }}</span>
                 </div>
 
-                <div class="social-buttons">
-                    <button mat-stroked-button type="button" (click)="loginWithMicrosoft()" class="microsoft-button">
-                        <svg class="provider-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M12 12h10.5v10.5H12V12zm0-12h10.5v10.5H12V0zM0 12h10.5v10.5H0V12zm0-12h10.5v10.5H0V0z" />
-                        </svg>
-                        <span>Microsoft</span>
+                <!-- Register Button -->
+                <button
+                    mat-raised-button
+                    color="primary"
+                    type="submit"
+                    class="full-width register-button"
+                    [disabled]="registerForm.invalid || loading"
+                >
+                    <mat-progress-spinner
+                        *ngIf="loading"
+                        diameter="20"
+                        mode="indeterminate"
+                        class="spinner"
+                    ></mat-progress-spinner>
+                    <span>Create Account</span>
+                </button>
+
+                <!-- OAuth Sign-Up Divider -->
+                <div class="divider">
+                    <span class="divider-line"></span>
+                    <span class="divider-text">OR</span>
+                    <span class="divider-line"></span>
+                </div>
+
+                <!-- OAuth Buttons -->
+                <div class="oauth-buttons">
+                    <button
+                        mat-stroked-button
+                        type="button"
+                        class="microsoft-button"
+                        (click)="loginWithMicrosoft()"
+                    >
+                        <img
+                            src="assets/icons/microsoft-logo.svg"
+                            alt="Microsoft"
+                            class="provider-icon"
+                        />
+                        <span>Continue with Microsoft</span>
                     </button>
 
-                    <button mat-stroked-button type="button" (click)="loginWithGithub()" class="github-button">
-                        <svg class="provider-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M12 0C5.373 0 0 5.373 0 12c0 5.303 3.438 9.8 8.207 11.387.6.111.793-.261.793-.577 0-.285-.01-1.04-.015-2.04-3.338.726-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.757-1.333-1.757-1.09-.745.083-.729.083-.729 1.205.084 1.84 1.237 1.84 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.774.418-1.305.76-1.605-2.665-.305-5.466-1.332-5.466-5.93 0-1.31.467-2.381 1.235-3.221-.124-.303-.535-1.527.117-3.176 0 0 1.008-.322 3.3 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.29-1.552 3.297-1.23 3.297-1.23.653 1.649.242 2.873.118 3.176.77.84 1.233 1.911 1.233 3.221 0 4.61-2.805 5.623-5.475 5.92.43.371.814 1.102.814 2.222 0 1.606-.014 2.898-.014 3.293 0 .319.192.694.8.576C20.565 21.796 24 17.299 24 12c0-6.627-5.373-12-12-12z" />
-                        </svg>
-                        <span>GitHub</span>
+                    <button
+                        mat-stroked-button
+                        type="button"
+                        class="github-button"
+                        (click)="loginWithGithub()"
+                    >
+                        <img
+                            src="assets/icons/github-logo.svg"
+                            alt="GitHub"
+                            class="provider-icon"
+                        />
+                        <span>Continue with GitHub</span>
                     </button>
                 </div>
             </form>
         </mat-card-content>
 
-        <mat-card-footer>
-            <p>Already have an account? <a routerLink="/auth/login" class="signin-link" (click)="navigateToLogin()">Sign
-                    in</a></p>
-        </mat-card-footer>
+        <mat-card-actions class="card-actions">
+            <span>Already have an account?</span>
+            <button mat-button color="accent" (click)="navigateToLogin()">
+                Sign In
+            </button>
+        </mat-card-actions>
     </mat-card>
 </div>

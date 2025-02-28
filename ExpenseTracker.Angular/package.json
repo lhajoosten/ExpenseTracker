@@ -11,7 +11,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "prettier": "prettier --write \"src/**/*.html\" \"src/**/*.ts\""
   },
   "private": true,
   "dependencies": {
@@ -25,7 +26,6 @@
     "@angular/platform-browser": "^19.1.8",
     "@angular/platform-browser-dynamic": "^19.1.8",
     "@angular/router": "^19.1.8",
-    "@tailwindcss/postcss": "^4.0.9",
     "chart.js": "^4.4.8",
     "ng2-charts": "^8.0.0",
     "rxjs": "~7.8.0",
@@ -38,7 +38,6 @@
     "@angular/compiler-cli": "^19.1.8",
     "@types/jasmine": "~5.1.0",
     "angular-eslint": "19.1.0",
-    "autoprefixer": "^10.4.20",
     "eslint": "^9.20.0",
     "jasmine-core": "~5.5.0",
     "karma": "~6.4.0",
@@ -46,8 +45,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "postcss": "^8.5.3",
-    "tailwindcss": "^4.0.9",
+    "prettier": "^3.5.2",
     "typescript": "~5.7.2",
     "typescript-eslint": "8.23.0"
   }

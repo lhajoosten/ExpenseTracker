@@ -1,10 +1,8 @@
 import { Directive } from '@angular/core';
 
 @Directive({
-  selector: '[appClickOutside]'
+    selector: '[appClickOutside]',
 })
 export class ClickOutsideDirective {
-
-  constructor() { }
-
+    constructor() {}
 }

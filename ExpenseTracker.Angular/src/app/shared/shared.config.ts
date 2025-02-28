@@ -74,7 +74,7 @@ export const materialModules = [
     MatAutocompleteModule,
     MatButtonToggleModule,
     MatProgressBarModule,
-    MatSnackBarModule
+    MatSnackBarModule,
 ];
 
 export const sharedConfig: ApplicationConfig = {
@@ -83,8 +83,7 @@ export const sharedConfig: ApplicationConfig = {
             CommonModule,
             FormsModule,
             ReactiveFormsModule,
-            ...materialModules
-        )
-    ]
+            ...materialModules,
+        ),
+    ],
 };
-

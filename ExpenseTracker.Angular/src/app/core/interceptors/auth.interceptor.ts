@@ -13,29 +13,29 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
 
     // Add withCredentials flag to allow cookies to be sent in cross-origin requests
     const authReq = req.clone({
-      withCredentials: true
+        withCredentials: true,
     });
 
     // Forward the modified request
     return next(authReq).pipe(
-      catchError((error: HttpErrorResponse) => {
-        if (error.status === 401) {
-          logger.warn('Authorization error', error);
+        catchError((error: HttpErrorResponse) => {
+            if (error.status === 401) {
+                logger.warn('Authorization error', error);
 
-          // Check if we're already on the login page to prevent redirect loops
-          if (!router.url.includes('/login')) {
-            // Store the current URL for redirecting after login
-            authService.redirectUrl = router.url;
+                // Check if we're already on the login page to prevent redirect loops
+                if (!router.url.includes('/login')) {
+                    // Store the current URL for redirecting after login
+                    authService.redirectUrl = router.url;
 
-            // Redirect to login
-            router.navigate(['/auth/login']);
-          }
-        } else if (error.status === 403) {
-          logger.warn('Forbidden resource', error);
-          router.navigate(['/forbidden']);
-        }
+                    // Redirect to login
+                    router.navigate(['/auth/signin']);
+                }
+            } else if (error.status === 403) {
+                logger.warn('Forbidden resource', error);
+                router.navigate(['/forbidden']);
+            }
 
-        return throwError(() => error);
-      })
+            return throwError(() => error);
+        }),
     );
-  };
+};

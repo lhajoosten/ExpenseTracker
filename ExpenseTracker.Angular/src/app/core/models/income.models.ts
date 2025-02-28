@@ -1,2 +1,1 @@
-export interface Income {
-}
+export interface Income {}
