@@ -1,7 +1,8 @@
 ﻿using ExpenseTracker.Common.Models;
+using ExpenseTracker.Common.Models.Identity;
 using System.Security.Claims;
 
-namespace ExpenseTracker.Common.Abstractions
+namespace ExpenseTracker.Common.Abstractions.Identity
 {
     public interface IAuthService
     {

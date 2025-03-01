@@ -1,4 +1,4 @@
-﻿namespace ExpenseTracker.Common.Abstractions
+﻿namespace ExpenseTracker.Common.Abstractions.Identity
 {
     public interface ICurrentUserService
     {

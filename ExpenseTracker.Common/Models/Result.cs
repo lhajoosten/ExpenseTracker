@@ -30,7 +30,7 @@
             Value = value;
         }
 
-        public static Result<T> Success(T value) => new Result<T>(true, value, new Dictionary<string, string>());
-        public static new Result<T> Failure(IReadOnlyDictionary<string, string> errors) => new Result<T>(false, default, errors);
+        public static Result<T> Success(T value) => new(true, value, new Dictionary<string, string>());
+        public static new Result<T> Failure(IReadOnlyDictionary<string, string> errors) => new(false, default!, errors);
     }
 }

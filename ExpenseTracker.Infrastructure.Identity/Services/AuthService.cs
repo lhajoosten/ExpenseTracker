@@ -1,5 +1,7 @@
 ﻿using ExpenseTracker.Common.Abstractions;
+using ExpenseTracker.Common.Abstractions.Identity;
 using ExpenseTracker.Common.Models;
+using ExpenseTracker.Common.Models.Identity;
 using ExpenseTracker.Infrastructure.Identity.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;

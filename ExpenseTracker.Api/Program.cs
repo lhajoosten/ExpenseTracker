@@ -1,11 +1,11 @@
 using Azure.Identity;
-using ExpenseTracker.Infrastructure.Identity;
+using ExpenseTracker.Api.Middlewares;
+using ExpenseTracker.Infrastructure.Identity.Configuration;
 using ExpenseTracker.Infrastructure.Identity.Seeding;
-using ExpenseTracker.Infrastructure.Mailing;
-using Microsoft.AspNetCore.CookiePolicy;
+using ExpenseTracker.Infrastructure.Mailing.Configuration;
+using ExpenseTracker.Infrastructure.OAuth.Configuration;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.OpenApi.Models;
-using Microsoft.Win32;
 
 namespace ExpenseTracker.Api
 {
@@ -49,10 +49,11 @@ namespace ExpenseTracker.Api
                 options.IdleTimeout = TimeSpan.FromMinutes(60);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
-                options.Cookie.SameSite = SameSiteMode.Lax;
+                options.Cookie.SameSite = SameSiteMode.None;
             });
             services.AddIdentityService(configuration);
             services.AddMailingService(configuration);
+            services.AddOAuthServices();
             services.AddHttpContextAccessor();
             services.AddDataProtection();
             services.AddControllers();
@@ -105,18 +106,6 @@ namespace ExpenseTracker.Api
 
             // Middleware Pipeline Configuration.
 
-            // 1. Global Exception Handling.
-            app.UseExceptionHandler(errorApp =>
-            {
-                errorApp.Run(async context =>
-                {
-                    var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
-                    var exception = exceptionHandlerPathFeature?.Error;
-                    // Log the exception as needed.
-                    await context.Response.WriteAsync($"An error occurred: {exception?.Message}");
-                });
-            });
-
             // 2. Seed Identity Data.
             app.Services.SeedIdentityDataAsync().GetAwaiter().GetResult();
 
@@ -139,13 +128,8 @@ namespace ExpenseTracker.Api
                 app.UseHsts();
             }
 
-            // 4. Cookie Policy.
-            app.UseCookiePolicy(new CookiePolicyOptions
-            {
-                MinimumSameSitePolicy = SameSiteMode.Lax,
-                Secure = CookieSecurePolicy.Always,
-                HttpOnly = HttpOnlyPolicy.Always
-            });
+            // 4. Use Exception Handler Middleware.
+            app.UseAuthenticationExceptionHandler();
 
             // 5. Enforce HTTPS.
             app.UseHttpsRedirection();

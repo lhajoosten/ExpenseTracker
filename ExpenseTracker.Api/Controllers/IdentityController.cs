@@ -1,8 +1,7 @@
-﻿using ExpenseTracker.Common.Abstractions;
-using ExpenseTracker.Common.Models;
+﻿using ExpenseTracker.Common.Abstractions.Identity;
+using ExpenseTracker.Common.Models.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Data;
 
 namespace ExpenseTracker.Api.Controllers
 {
