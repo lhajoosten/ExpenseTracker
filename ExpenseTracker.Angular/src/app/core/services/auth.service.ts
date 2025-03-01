@@ -33,7 +33,7 @@ export class AuthService {
 
     // Check if user is already authenticated (cookies will be sent automatically)
     checkAuthStatus(): Observable<boolean> {
-        return this.http.get<AuthResponse>(`${this.apiUrl}/auth/status`).pipe(
+        return this.http.get<AuthResponse>(`${this.apiUrl}/oauth/status`).pipe(
             tap((response) => {
                 if (response.success && response.user) {
                     this.currentUserSubject.next(response.user);
@@ -46,6 +46,30 @@ export class AuthService {
             catchError((error) => {
                 this.logger.error('Auth status check failed', error);
                 this.currentUserSubject.next(null);
+                return of(false);
+            }),
+        );
+    }
+
+    refreshAuthStatus(): Observable<boolean> {
+        return this.http.get<AuthResponse>(`${this.apiUrl}/oauth/status`, {
+            // Force the request to go to the network, not use cache
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            }
+        }).pipe(
+            tap((response) => {
+                if (response.success && response.user) {
+                    this.currentUserSubject.next(response.user);
+                    this.logger.info('User authenticated', response.user);
+                } else {
+                    this.currentUserSubject.next(null);
+                }
+            }),
+            map((response) => response.success),
+            catchError((error) => {
+                this.logger.error('Auth status refresh failed', error);
                 return of(false);
             }),
         );

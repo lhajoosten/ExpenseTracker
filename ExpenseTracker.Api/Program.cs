@@ -2,10 +2,10 @@ using Azure.Identity;
 using ExpenseTracker.Infrastructure.Identity;
 using ExpenseTracker.Infrastructure.Identity.Seeding;
 using ExpenseTracker.Infrastructure.Mailing;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.OpenApi.Models;
+using Microsoft.Win32;
 
 namespace ExpenseTracker.Api
 {
@@ -13,10 +13,16 @@ namespace ExpenseTracker.Api
     {
         public static void Main(string[] args)
         {
+            // Create the builder and retrieve configuration & services.
             var builder = WebApplication.CreateBuilder(args);
             var configuration = builder.Configuration;
             var services = builder.Services;
 
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
+            builder.Logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
+
+            // Configure Kestrel for HTTPS defaults.
             builder.WebHost.ConfigureKestrel(serverOptions =>
             {
                 serverOptions.ConfigureHttpsDefaults(configureOptions =>
@@ -25,47 +31,37 @@ namespace ExpenseTracker.Api
                 });
             });
 
+            // Configure Azure Key Vault for Production.
             if (builder.Environment.IsProduction())
             {
-                string keyVaultUri = builder.Configuration["VaultUri"]!;
+                string keyVaultUri = configuration["VaultUri"]!;
                 if (!string.IsNullOrEmpty(keyVaultUri))
                 {
                     var credential = new DefaultAzureCredential();
-                    builder.Configuration.AddAzureKeyVault(new Uri(keyVaultUri), credential);
+                    configuration.AddAzureKeyVault(new Uri(keyVaultUri), credential);
                 }
             }
 
-            builder.Services.AddDistributedMemoryCache();
-            builder.Services.AddSession(options =>
+            // Service Registration.
+            services.AddDistributedMemoryCache();
+            services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromDays(7);
+                options.IdleTimeout = TimeSpan.FromMinutes(60);
                 options.Cookie.HttpOnly = true;
-                options.Cookie.SameSite = SameSiteMode.None;
-                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                 options.Cookie.IsEssential = true;
+                options.Cookie.SameSite = SameSiteMode.Lax;
             });
-
-            // Register Identity
             services.AddIdentityService(configuration);
-
-            // Register Mailing
             services.AddMailingService(configuration);
-
-            // Register IHttpContextAccessor
             services.AddHttpContextAccessor();
-
-            // Register Data Protection
             services.AddDataProtection();
+            services.AddControllers();
 
-            // Add services to the container.
-            builder.Services.AddControllers();
-
-            // Register Swagger with JWT Support
+            // Register Swagger with JWT Support.
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "ExpenseTracker API", Version = "v1" });
-
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Description = "Enter 'Bearer {your token}'",
@@ -74,7 +70,6 @@ namespace ExpenseTracker.Api
                     Type = SecuritySchemeType.Http,
                     Scheme = "bearer"
                 });
-
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
                     {
@@ -89,11 +84,11 @@ namespace ExpenseTracker.Api
                         Array.Empty<string>()
                     }
                 });
-
-                // Explicitly set Swagger base path
+                // Set Swagger base path explicitly.
                 c.AddServer(new OpenApiServer { Url = "https://localhost:8443" });
             });
 
+            // Register CORS Policy.
             services.AddCors(options =>
             {
                 options.AddPolicy("ClientCorsPolicy", policy =>
@@ -101,28 +96,31 @@ namespace ExpenseTracker.Api
                     policy.WithOrigins("https://localhost:4443")
                           .AllowAnyMethod()
                           .AllowAnyHeader()
-                          .AllowCredentials(); // This is critical for cookies
+                          .AllowCredentials(); // Critical for cookies.
                 });
             });
 
+            // Build the application.
             var app = builder.Build();
 
-            // Use custom exception middleware
+            // Middleware Pipeline Configuration.
+
+            // 1. Global Exception Handling.
             app.UseExceptionHandler(errorApp =>
             {
                 errorApp.Run(async context =>
                 {
                     var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
                     var exception = exceptionHandlerPathFeature?.Error;
-                    // Log the exception
-                    await context.Response.WriteAsync($"An error occurred see the error: ${exception?.Message}");
+                    // Log the exception as needed.
+                    await context.Response.WriteAsync($"An error occurred: {exception?.Message}");
                 });
             });
 
-
+            // 2. Seed Identity Data.
             app.Services.SeedIdentityDataAsync().GetAwaiter().GetResult();
 
-            // Configure the HTTP request pipeline.
+            // 3. Environment-specific Middleware.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger(c =>
@@ -141,8 +139,7 @@ namespace ExpenseTracker.Api
                 app.UseHsts();
             }
 
-            app.UseSession();
-
+            // 4. Cookie Policy.
             app.UseCookiePolicy(new CookiePolicyOptions
             {
                 MinimumSameSitePolicy = SameSiteMode.Lax,
@@ -150,22 +147,26 @@ namespace ExpenseTracker.Api
                 HttpOnly = HttpOnlyPolicy.Always
             });
 
-            // Use Https Redirection to enforce HTTPS
+            // 5. Enforce HTTPS.
             app.UseHttpsRedirection();
 
-            // Use Routing
+            // 6. Enable Routing.
             app.UseRouting();
 
-            // Use the CORS policy
+            // 7. Use Session early.
+            app.UseSession();
+
+            // 8. Apply CORS Policy.
             app.UseCors("ClientCorsPolicy");
 
-            // Use Authentication & Authorization
+            // 9. Apply Authentication & Authorization.
             app.UseAuthentication();
             app.UseAuthorization();
 
-            // Map Api Controllers
+            // 10. Map API Controllers.
             app.MapControllers();
 
+            // Run the application.
             app.Run();
         }
     }

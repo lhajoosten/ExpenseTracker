@@ -5,12 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExpenseTracker.Infrastructure.Identity.Data
 {
-    public class ETIdentityContext : IdentityDbContext<AppUser, AppRole, Guid>
+    public class ETIdentityContext(DbContextOptions<ETIdentityContext> options) : IdentityDbContext<AppUser, AppRole, Guid>(options)
     {
-        public ETIdentityContext(DbContextOptions<ETIdentityContext> options) : base(options)
-        {
-        }
-
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -21,11 +17,9 @@ namespace ExpenseTracker.Infrastructure.Identity.Data
             builder.Entity<AppUser>(entity => { entity.ToTable(name: "User"); });
             builder.Entity<IdentityUserRole<Guid>>(entity => { entity.ToTable("UserRole"); });
             builder.Entity<IdentityUserLogin<Guid>>(entity => { entity.ToTable("UserLogin"); });
-
-            // Ignoring the following tables
-            builder.Ignore<IdentityUserClaim<Guid>>();
-            builder.Ignore<IdentityRoleClaim<Guid>>();
-            builder.Ignore<IdentityUserToken<Guid>>();
+            builder.Entity<IdentityUserClaim<Guid>>(entity => { entity.ToTable("UserClaim"); });
+            builder.Entity<IdentityRoleClaim<Guid>>(entity => { entity.ToTable("RoleClaim"); });
+            builder.Entity<IdentityUserToken<Guid>>(entity => { entity.ToTable("UserToken"); });
         }
     }
 }

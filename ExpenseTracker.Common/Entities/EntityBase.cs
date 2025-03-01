@@ -5,13 +5,19 @@ namespace ExpenseTracker.Common.Entities
     public abstract class EntityBase<T> : IEntityBase
     {
         private readonly List<INotification> _domainEvents = new();
-        private readonly object _lock = new();
+        private readonly Lock _lock = new();
 
         public IReadOnlyList<INotification> DomainEvents => _domainEvents.AsReadOnly();
 
         public T Id { get; set; }
 
-        protected EntityBase() { }
+        protected EntityBase() 
+        {
+            if (typeof(T) == typeof(Guid))
+            {
+                Id = (T)(object)Guid.NewGuid();
+            }
+        }
 
         public void AddDomainEvent(INotification eventItem)
         {
@@ -45,13 +51,13 @@ namespace ExpenseTracker.Common.Entities
             if (ReferenceEquals(this, other))
                 return true;
 
-            if (this.IsTransient() || other.IsTransient())
+            if (IsTransient() || other.IsTransient())
                 return false;
 
-            return this.Id.Equals(other.Id);
+            return Id!.Equals(other.Id);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return Equals(obj as EntityBase<T>);
         }
@@ -60,7 +66,7 @@ namespace ExpenseTracker.Common.Entities
         {
             if (!IsTransient())
             {
-                return this.Id.GetHashCode() ^ 31;
+                return Id!.GetHashCode() ^ 31;
             }
             else
             {

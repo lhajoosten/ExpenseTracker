@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Security.Claims;
 
 namespace ExpenseTracker.Infrastructure.Identity
 {
@@ -94,10 +93,10 @@ namespace ExpenseTracker.Infrastructure.Identity
             {
                 options.Cookie.Name = "Identity.Application";
                 options.Cookie.HttpOnly = true;
+                options.Cookie.SameSite = SameSiteMode.Lax;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                options.Cookie.SameSite = SameSiteMode.None;
-                options.Cookie.Domain = null; // Remove the Domain setting to test
-                options.ExpireTimeSpan = TimeSpan.FromDays(30);
+                options.ExpireTimeSpan = TimeSpan.FromDays(7);
+                options.SlidingExpiration = true;
 
                 // Add logging for diagnosis
                 options.Events = new CookieAuthenticationEvents
@@ -135,69 +134,68 @@ namespace ExpenseTracker.Infrastructure.Identity
                 // Force correlation cookie creation
                 options.CorrelationCookie.Name = ".AspNetCore.Correlation.Microsoft";
                 options.CorrelationCookie.HttpOnly = true;
-                options.CorrelationCookie.SameSite = SameSiteMode.None; // Change from Lax to None
+                options.CorrelationCookie.SameSite = SameSiteMode.Lax; // Change from Lax to None
                 options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
-                options.CorrelationCookie.Expiration = TimeSpan.FromDays(7);
+                options.CorrelationCookie.Expiration = TimeSpan.FromMinutes(15);
 
                 options.SignInScheme = "Identity.Application";
 
+                // Add event handlers
                 options.Events.OnRemoteFailure = context => {
-                    Console.WriteLine($"Remote failure: {context.Failure?.Message}");
-
-                    // Check if Properties exists before accessing Items
-                    if (context.Properties?.Items != null)
+                    if (context.Failure != null &&
+                        (context.Failure.Message.Contains("state") || context.Failure.Message.Contains("correlation")))
                     {
-                        Console.WriteLine($"Properties: {string.Join(", ", context.Properties.Items.Select(i => $"{i.Key}={i.Value}"))}");
-                    }
+                        // If the user is already authenticated, redirect to success
+                        if (context.HttpContext.User.Identity?.IsAuthenticated == true)
+                        {
+                            context.Response.Redirect($"{configuration["App:ClientUrl"]}?auth=success");
+                            context.HandleResponse();
+                            return Task.CompletedTask;
+                        }
 
-                    context.Response.Redirect($"/api/oauth/handle-state-failure?provider=Microsoft&error={Uri.EscapeDataString(context.Failure?.Message ?? "Unknown error")}");
-                    context.HandleResponse();
+                        // Otherwise handle the error
+                        context.Response.Redirect($"/api/oauth/handle-state-failure?provider=Microsoft&error={Uri.EscapeDataString(context.Failure.Message)}");
+                        context.HandleResponse();
+                    }
                     return Task.CompletedTask;
                 };
-
-                options.StateDataFormat = services.BuildServiceProvider().GetRequiredService<ISecureDataFormat<AuthenticationProperties>>();
             })
             .AddGitHub("GitHub", options => // Explicitly name the scheme
             {
                 options.ClientId = configuration["Authentication:GitHub:ClientId"]!;
                 options.ClientSecret = configuration["Authentication:GitHub:ClientSecret"]!;
                 options.CallbackPath = configuration["Authentication:GitHub:CallbackPath"]!;
-                options.SaveTokens = true;
-
-                // Add more scopes for GitHub - user:email is crucial for getting email
                 options.Scope.Add("user:email");
+                options.SaveTokens = true;
 
                 // Force correlation cookie creation
                 options.CorrelationCookie.Name = ".AspNetCore.Correlation.GitHub";
                 options.CorrelationCookie.HttpOnly = true;
-                options.CorrelationCookie.SameSite = SameSiteMode.None;
+                options.CorrelationCookie.SameSite = SameSiteMode.Lax;
                 options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
-                options.CorrelationCookie.Expiration = TimeSpan.FromDays(7);
+                options.CorrelationCookie.Expiration = TimeSpan.FromMinutes(15);
 
                 options.SignInScheme = "Identity.Application";
 
-                // Add GitHub-specific logging
-                options.Events.OnCreatingTicket = context => {
-                    Console.WriteLine("GitHub creating ticket");
-                    Console.WriteLine($"GitHub Claims: {string.Join(", ", context.Identity.Claims.Select(c => $"{c.Type}: {c.Value}"))}");
-                    return Task.CompletedTask;
-                };
-
+                // Add event handlers
                 options.Events.OnRemoteFailure = context => {
-                    Console.WriteLine($"Remote failure: {context.Failure?.Message}");
-
-                    // Check if Properties exists before accessing Items
-                    if (context.Properties?.Items != null)
+                    if (context.Failure != null &&
+                        (context.Failure.Message.Contains("state") || context.Failure.Message.Contains("correlation")))
                     {
-                        Console.WriteLine($"Properties: {string.Join(", ", context.Properties.Items.Select(i => $"{i.Key}={i.Value}"))}");
-                    }
+                        // If the user is already authenticated, redirect to success
+                        if (context.HttpContext.User.Identity?.IsAuthenticated == true)
+                        {
+                            context.Response.Redirect($"{configuration["App:ClientUrl"]}?auth=success");
+                            context.HandleResponse();
+                            return Task.CompletedTask;
+                        }
 
-                    context.Response.Redirect($"/api/oauth/handle-state-failure?provider=GitHub&error={Uri.EscapeDataString(context.Failure?.Message ?? "Unknown error")}");
-                    context.HandleResponse();
+                        // Otherwise handle the error
+                        context.Response.Redirect($"/api/oauth/handle-state-failure?provider=GitHub&error={Uri.EscapeDataString(context.Failure.Message)}");
+                        context.HandleResponse();
+                    }
                     return Task.CompletedTask;
                 };
-
-                options.StateDataFormat = services.BuildServiceProvider().GetRequiredService<ISecureDataFormat<AuthenticationProperties>>();
             });
         }
 

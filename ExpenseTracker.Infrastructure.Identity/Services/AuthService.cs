@@ -2,15 +2,21 @@
 using ExpenseTracker.Common.Models;
 using ExpenseTracker.Infrastructure.Identity.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 
 namespace ExpenseTracker.Infrastructure.Identity.Services
 {
-    public class AuthService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IEmailService emailSender) : IAuthService
+    public class AuthService(
+        UserManager<AppUser> userManager, 
+        SignInManager<AppUser> signInManager, 
+        IEmailService emailSender, 
+        ILogger<AuthService> logger) : IAuthService
     {
         private readonly UserManager<AppUser> _userManager = userManager;
         private readonly SignInManager<AppUser> _signInManager = signInManager;
         private readonly IEmailService _emailSender = emailSender;
+        private readonly ILogger<AuthService> _logger = logger;
 
         public async Task<Result> SignUpAsync(SignUpRequest signUpRequest)
         {
@@ -240,28 +246,94 @@ namespace ExpenseTracker.Infrastructure.Identity.Services
 
         public async Task<Result<ApplicationUserDto>> GetCurrentUserAsync(ClaimsPrincipal principal)
         {
-            var user = await _userManager.GetUserAsync(principal);
+            _logger.LogInformation("Attempting to get current user.");
+
+            AppUser? user = null;
+
+            try
+            {
+                // Try to get the user directly - but this might fail with external login providers
+                user = await _userManager.GetUserAsync(principal);
+                _logger.LogInformation("User retrieved directly using GetUserAsync.");
+            }
+            catch (FormatException ex)
+            {
+                // This is expected with external login providers that have non-GUID NameIdentifier formats
+                _logger.LogInformation("Format exception in GetUserAsync (expected with OAuth): {Message}", ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("Unexpected error in GetUserAsync: {Message}", ex.Message);
+            }
+
+            // If direct lookup fails, try by name claim
+            if (user == null && principal.Identity?.Name != null)
+            {
+                _logger.LogInformation("Attempting to find user by name claim: {Name}", principal.Identity.Name);
+                user = await _userManager.FindByNameAsync(principal.Identity.Name);
+            }
+
+            // If that fails too, try by email claim
             if (user == null)
             {
-                return Result<ApplicationUserDto>.Failure(new Dictionary<string, string>
+                var email = principal.FindFirstValue(ClaimTypes.Email);
+                if (!string.IsNullOrEmpty(email))
                 {
-                    { "User", "User not found." }
-                });
+                    _logger.LogInformation("Attempting to find user by email claim: {Email}", email);
+                    user = await _userManager.FindByEmailAsync(email);
+                }
             }
+
+            // As a last resort, try by sub claim (common in OAuth flows)
+            if (user == null)
+            {
+                var nameIdentifier = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!string.IsNullOrEmpty(nameIdentifier))
+                {
+                    _logger.LogInformation("Attempting to find user by NameIdentifier claim: {NameIdentifier}", nameIdentifier);
+                    // Try to find user by external login
+                    var users = _userManager.Users.ToList();
+                    foreach (var potentialUser in users)
+                    {
+                        var logins = await _userManager.GetLoginsAsync(potentialUser);
+                        if (logins.Any(l => l.ProviderKey == nameIdentifier))
+                        {
+                            user = potentialUser;
+                            _logger.LogInformation("User found by external login: {UserId}", user.Id);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (user == null)
+            {
+                _logger.LogWarning("User not found.");
+                return Result<ApplicationUserDto>.Failure(new Dictionary<string, string>
+        {
+            { "User", "User not found." }
+        });
+            }
+
+            _logger.LogInformation("User found: {UserId}", user.Id);
 
             var roles = await _userManager.GetRolesAsync(user);
             var rolesDto = roles.Select(r => new ApplicationRoleDto { Name = r }).ToList();
 
             var userDto = new ApplicationUserDto
             {
-                Id = Guid.Parse(user.Id.ToString()),
+                Id = user.Id, // No need to parse this since it's already a Guid
                 UserName = user.UserName!,
+                Firstname = user.FirstName ?? string.Empty,
+                Lastname = user.LastName ?? string.Empty,
                 Email = user.Email!,
                 EmailConfirmed = user.EmailConfirmed,
-                PhoneNumber = user.PhoneNumber!,
+                PhoneNumber = user.PhoneNumber ?? string.Empty,
                 PhoneNumberConfirmed = user.PhoneNumberConfirmed,
                 Roles = rolesDto
             };
+
+            _logger.LogInformation("Returning user details for user: {UserId}", user.Id);
 
             return Result<ApplicationUserDto>.Success(userDto);
         }
