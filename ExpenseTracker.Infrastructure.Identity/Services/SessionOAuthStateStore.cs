@@ -1,27 +1,16 @@
-﻿// Create in Infrastructure/Identity/Services/SessionOAuthStateStore.cs
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.Extensions.Options;
 
 namespace ExpenseTracker.Infrastructure.Identity.Services
 {
-    public class SessionOAuthStateStore : ISecureDataFormat<AuthenticationProperties>
+    public class SessionOAuthStateStore(
+        IDataProtectionProvider dataProtectionProvider) : ISecureDataFormat<AuthenticationProperties>
     {
-        private readonly IDataProtector _dataProtector;
-        private readonly PropertiesDataFormat _propertiesDataFormat;
-
-        public SessionOAuthStateStore(
-            IDataProtectionProvider dataProtectionProvider,
-            IOptions<CookieAuthenticationOptions> cookieOptions)
-        {
-            _dataProtector = dataProtectionProvider.CreateProtector("Microsoft.AspNetCore.Authentication.OAuth");
-            _propertiesDataFormat = new PropertiesDataFormat(
+        private readonly PropertiesDataFormat _propertiesDataFormat = new PropertiesDataFormat(
                 dataProtectionProvider.CreateProtector(
                     "Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationMiddleware",
                     "Identity.Application",
                     "v2"));
-        }
 
         public string Protect(AuthenticationProperties data)
         {
@@ -56,7 +45,6 @@ namespace ExpenseTracker.Infrastructure.Identity.Services
             }
             catch
             {
-                // If anything fails, just return a fresh AuthenticationProperties
                 return new AuthenticationProperties();
             }
         }

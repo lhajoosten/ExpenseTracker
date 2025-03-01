@@ -1,18 +1,21 @@
 ﻿using AutoMapper;
 using ExpenseTracker.Common.Abstractions;
+using ExpenseTracker.Common.Abstractions.Identity;
+using ExpenseTracker.Infrastructure.Identity.Configuration;
 using ExpenseTracker.Infrastructure.Identity.Data;
 using ExpenseTracker.Infrastructure.Identity.Mapping;
 using ExpenseTracker.Infrastructure.Identity.Models;
 using ExpenseTracker.Infrastructure.Identity.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ExpenseTracker.Infrastructure.Identity
+namespace ExpenseTracker.Infrastructure.Identity.Configuration
 {
     public static class DependencyInjection
     {
