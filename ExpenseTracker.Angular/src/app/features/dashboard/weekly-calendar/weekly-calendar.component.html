@@ -1,1 +1,71 @@
-<p>weekly-calendar works!</p>
+<mat-card class="calendar-card">
+    <mat-card-header>
+        <mat-card-title>Weekly Overview</mat-card-title>
+
+        <div class="calendar-navigation">
+            <button mat-icon-button (click)="previousWeek()" matTooltip="Previous Week">
+                <mat-icon>chevron_left</mat-icon>
+            </button>
+            <span class="week-label">{{ getCurrentWeekLabel() }}</span>
+            <button mat-icon-button (click)="nextWeek()" matTooltip="Next Week">
+                <mat-icon>chevron_right</mat-icon>
+            </button>
+        </div>
+    </mat-card-header>
+
+    <mat-card-content>
+        <!-- Weekly Calendar View -->
+        <div class="calendar-grid">
+            <!-- Day Headers -->
+            <div class="weekday-header" *ngFor="let day of weekDays">
+                {{ day }}
+            </div>
+
+            <!-- Day Cells -->
+            <div *ngFor="let day of calendarDays" class="day-cell"
+                [ngClass]="{'current-day': day.isToday, 'other-month': !day.isCurrentMonth}">
+                <div class="day-number">{{ formatDate(day.date) }}</div>
+
+                <div *ngIf="day.hasExpenses" class="expense-indicator"
+                    matTooltip="${{ day.totalAmount }} in {{ day.transactions }} transaction(s)">
+                    <mat-icon>monetization_on</mat-icon>
+                    <span>${{ day.totalAmount }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Transactions -->
+        <div class="upcoming-transactions">
+            <h3>Upcoming Payments</h3>
+
+            <div class="transactions-list">
+                <div *ngIf="upcomingTransactions.length === 0" class="no-transactions">
+                    <p>No upcoming payments scheduled.</p>
+                </div>
+
+                <div *ngFor="let transaction of upcomingTransactions" class="transaction-item"
+                    [ngClass]="{'paid': transaction.isPaid}">
+                    <div class="transaction-details">
+                        <div class="transaction-name">
+                            {{ transaction.name }}
+                            <mat-icon *ngIf="transaction.isRecurring" class="recurring-icon"
+                                matTooltip="Recurring payment">loop</mat-icon>
+                        </div>
+                        <div class="transaction-info">
+                            <span class="transaction-category">{{ transaction.category }}</span>
+                            <span class="transaction-date">Due {{ getDaysUntil(transaction.dueDate) }}</span>
+                        </div>
+                    </div>
+
+                    <div class="transaction-actions">
+                        <span class="transaction-amount">${{ transaction.amount.toFixed(2) }}</span>
+                        <button mat-icon-button color="primary" [disabled]="transaction.isPaid"
+                            (click)="markAsPaid(transaction)" matTooltip="Mark as paid" class="pay-button">
+                            <mat-icon>{{ transaction.isPaid ? 'check_circle' : 'check_circle_outline' }}</mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </mat-card-content>
+</mat-card>

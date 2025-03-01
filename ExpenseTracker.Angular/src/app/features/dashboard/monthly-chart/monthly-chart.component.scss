@@ -1,0 +1,95 @@
+.chart-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    mat-card-header {
+        padding: 16px 16px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+
+        mat-card-title {
+            color: var(--text-primary);
+        }
+    }
+
+    mat-card-content {
+        padding: 16px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    mat-card-actions {
+        display: flex;
+        justify-content: flex-end;
+        padding: 8px 16px;
+        gap: 8px;
+        border-top: 1px solid var(--divider-color);
+
+        button {
+            color: var(--color-primary);
+        }
+    }
+
+    .chart-controls {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+
+        .period-select,
+        .year-select {
+            min-width: 120px;
+            color: var(--text-primary);
+        }
+    }
+
+    .period-select,
+    .year-select {
+        min-width: 120px;
+        margin-bottom: -1.25em; // Remove extra space at bottom of mat-form-field
+    }
+
+    ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+        display: none;
+    }
+
+    ::ng-deep .mat-mdc-text-field-wrapper {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    ::ng-deep .mat-mdc-form-field-infix {
+        padding-top: 8px;
+        padding-bottom: 8px;
+        min-height: 40px;
+    }
+
+    .chart-container {
+        flex-grow: 1;
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+
+    // Responsive adjustments
+    @media (max-width: 600px) {
+        mat-card-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .chart-controls {
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .period-select,
+        .year-select {
+            min-width: 100px;
+        }
+    }
+}

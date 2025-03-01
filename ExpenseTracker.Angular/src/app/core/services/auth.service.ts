@@ -142,6 +142,50 @@ export class AuthService {
             );
     }
 
+    // Confirm email
+    confirmEmail(token: string, email: string): Observable<boolean> {
+        return this.http
+            .post<AuthResponse>(`${this.apiUrl}/auth/confirm-email`, { token, email })
+            .pipe(
+                map((response) => {
+                    if (response.success) {
+                        this.logger.info('Email confirmed successfully');
+                        // If the confirmation also logs the user in, update user state
+                        if (response.user) {
+                            this.currentUserSubject.next(response.user);
+                        }
+                        return true;
+                    } else {
+                        throw new Error(response.message || 'Email confirmation failed');
+                    }
+                }),
+                catchError((error) => {
+                    this.logger.error('Email confirmation failed', error);
+                    return throwError(() => error);
+                }),
+            );
+    }
+
+    // Resend confirmation email
+    resendConfirmationEmail(email: string): Observable<boolean> {
+        return this.http
+            .post<AuthResponse>(`${this.apiUrl}/auth/resend-confirmation`, { email })
+            .pipe(
+                map((response) => {
+                    if (response.success) {
+                        this.logger.info('Confirmation email sent successfully');
+                        return true;
+                    } else {
+                        throw new Error(response.message || 'Failed to resend confirmation email');
+                    }
+                }),
+                catchError((error) => {
+                    this.logger.error('Failed to resend confirmation email', error);
+                    return throwError(() => error);
+                }),
+            );
+    }
+
     // Get current user profile
     getCurrentUser(): Observable<User> {
         return this.http.get<User>(`${this.apiUrl}/auth/current`).pipe(

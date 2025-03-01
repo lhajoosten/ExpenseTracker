@@ -1,0 +1,76 @@
+@use "@angular/material" as mat;
+@use "./palette" as palette;
+@use "sass:map";
+
+// Create the palettes for your theme
+$app-primary: mat.m2-define-palette(palette.$primary-palette);
+$app-accent: mat.m2-define-palette(palette.$accent-palette);
+$app-warn: mat.m2-define-palette(palette.$warn-palette);
+
+// Light theme
+$light-theme: mat.m2-define-light-theme(
+    (
+        color: (
+            primary: $app-primary,
+            accent: $app-accent,
+            warn: $app-warn,
+        ),
+    )
+);
+
+// Dark theme
+$dark-theme: mat.m2-define-dark-theme(
+    (
+        color: (
+            primary: $app-primary,
+            accent: $app-accent,
+            warn: $app-warn,
+        ),
+    )
+);
+
+// Custom theme variables
+$theme-variables: (
+    light: (
+        // Background colors
+        background-default: #f5f5f5,
+        background-card: white,
+        // Text colors
+        text-primary: rgba(0, 0, 0, 0.87),
+        text-secondary: rgba(0, 0, 0, 0.6),
+        text-disabled: rgba(0, 0, 0, 0.38),
+        // Border colors
+        divider-color: rgba(0, 0, 0, 0.12),
+        // Status colors
+        color-success: map.get(palette.$theme-colors, success),
+        color-warning: map.get(palette.$theme-colors, warning),
+        color-danger: map.get(palette.$theme-colors, danger),
+        color-info: map.get(palette.$theme-colors, info),
+    ),
+    dark: (
+        // Background colors
+        background-default: #1a1a1a,
+        background-card: #2d2d2d,
+        // Text colors
+        text-primary: white,
+        text-secondary: rgba(255, 255, 255, 0.7),
+        text-disabled: rgba(255, 255, 255, 0.5),
+        // Border colors
+        divider-color: rgba(255, 255, 255, 0.12),
+        // Status colors
+        color-success: map.get(palette.$theme-colors, success),
+        color-warning: map.get(palette.$theme-colors, warning),
+        color-danger: map.get(palette.$theme-colors, danger),
+        color-info: map.get(palette.$theme-colors, info),
+    ),
+);
+
+// Theme mixins
+@mixin theme-colors($theme-name) {
+    $vars: map.get($theme-variables, $theme-name);
+
+    // Apply all variables
+    @each $name, $value in $vars {
+        --#{$name}: #{$value};
+    }
+}

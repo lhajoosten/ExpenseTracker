@@ -1,1 +1,40 @@
-<p>expenses-summary works!</p>
+<mat-card class="expenses-summary-card">
+    <mat-card-header>
+        <mat-card-title>Expenses by Category</mat-card-title>
+        <mat-card-subtitle>{{ currentMonth }} Summary</mat-card-subtitle>
+        <button mat-button color="primary" class="view-all-button" (click)="viewAllCategories()">
+            View All
+        </button>
+    </mat-card-header>
+
+    <mat-divider></mat-divider>
+
+    <mat-card-content>
+        <div class="total-expenses">
+            <span class="label">Total Expenses</span>
+            <span class="amount">{{ formatAmount(totalExpenses) }}</span>
+        </div>
+
+        <div class="category-list">
+            <div *ngFor="let category of categoryData" class="category-item">
+                <div class="category-header">
+                    <div class="category-icon" [style.background-color]="category.color + '16'">
+                        <mat-icon [style.color]="category.color">{{ category.icon }}</mat-icon>
+                    </div>
+                    <div class="category-info">
+                        <span class="category-name">{{ category.name }}</span>
+                        <span class="category-amount">{{ formatAmount(category.amount) }}</span>
+                    </div>
+                    <div class="category-percentage" matTooltip="Percentage of total expenses">
+                        {{ category.percentage.toFixed(1) }}%
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-bar" [style.width]="getProgressWidth(category.percentage)"
+                        [style.background-color]="category.color"></div>
+                </div>
+            </div>
+        </div>
+    </mat-card-content>
+</mat-card>

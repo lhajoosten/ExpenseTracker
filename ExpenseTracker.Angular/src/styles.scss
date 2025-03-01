@@ -1,8 +1,87 @@
+@use "@angular/material" as mat;
+@use "theme/palette" as palette;
+@use "theme/theme" as theme;
+
+// Include theme styles for core and each component
+@include mat.core();
+
+// Define light theme
+.light-theme {
+    @include mat.all-component-themes(theme.$light-theme);
+    @include theme.theme-colors("light");
+}
+
+// Define dark theme
+.dark-theme {
+    @include mat.all-component-themes(theme.$dark-theme);
+    @include theme.theme-colors("dark");
+}
+
+// Base styles
 html,
 body {
     height: 100%;
-}
-body {
     margin: 0;
-    font-family: Roboto, "Helvetica Neue", sans-serif;
+    font-family: palette.$font-family-base;
+}
+
+body {
+    background-color: var(--background-default);
+    color: var(--text-primary);
+}
+
+// Common utility classes
+.text-success {
+    color: var(--color-success) !important;
+}
+.text-warning {
+    color: var(--color-warning) !important;
+}
+.text-danger {
+    color: var(--color-danger) !important;
+}
+.text-info {
+    color: var(--color-info) !important;
+}
+
+.bg-success {
+    background-color: var(--color-success) !important;
+    opacity: 0.1;
+}
+.bg-warning {
+    background-color: var(--color-warning) !important;
+    opacity: 0.1;
+}
+.bg-danger {
+    background-color: var(--color-danger) !important;
+    opacity: 0.1;
+}
+.bg-info {
+    background-color: var(--color-info) !important;
+    opacity: 0.1;
+}
+
+// Card styles
+.mat-mdc-card {
+    background-color: var(--background-card) !important;
+    color: var(--text-primary);
+}
+
+// Typography
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.text-secondary {
+    color: var(--text-secondary);
+}
+
+.text-disabled {
+    color: var(--text-disabled);
 }

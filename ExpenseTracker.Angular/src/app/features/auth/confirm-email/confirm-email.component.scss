@@ -1,0 +1,113 @@
+.confirm-email-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 1.5rem;
+    background-color: var(--background-default);
+}
+
+.confirm-email-card {
+    width: 100%;
+    max-width: 500px;
+    border-radius: 16px;
+    background-color: var(--background-card);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+
+    .card-content {
+        padding: 3rem 2rem;
+        text-align: center;
+    }
+
+    .icon-container {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto 2rem;
+
+        mat-icon {
+            font-size: 40px;
+            width: 40px;
+            height: 40px;
+        }
+
+        &.loading {
+            background-color: rgba(var(--color-info), 0.1);
+            color: var(--color-info);
+        }
+
+        &.success {
+            background-color: rgba(var(--color-success), 0.1);
+            color: var(--color-success);
+        }
+
+        &.error {
+            background-color: rgba(var(--color-danger), 0.1);
+            color: var(--color-danger);
+        }
+    }
+
+    h2 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+
+    p {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+
+        button {
+            min-width: 120px;
+            height: 48px;
+            font-size: 1rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+    }
+}
+
+.loading-state,
+.success-state,
+.error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+mat-progress-spinner {
+    margin-bottom: 24px;
+}
+
+// Responsive adjustments
+@media (max-width: 600px) {
+    .card-content {
+        padding: 30px 20px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        width: 100%;
+
+        button {
+            width: 100%;
+        }
+    }
+}

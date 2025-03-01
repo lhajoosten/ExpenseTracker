@@ -1,1 +1,102 @@
-<p>dashboard works!</p>
+<!-- dashboard-layout.component.html -->
+<div class="dashboard-layout">
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <!-- Dashboard Components Grid -->
+        <div class="components-grid">
+            <!-- Top Row Components -->
+            <div class="grid-row">
+                <mat-card class="dashboard-card component-1">
+                    <mat-card-header>
+                        <mat-card-title>Component 1</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <app-expenses-summary></app-expenses-summary>
+                    </mat-card-content>
+                </mat-card>
+
+                <mat-card class="dashboard-card component-2">
+                    <mat-card-header>
+                        <mat-card-title>Component 2</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="transactions-container">
+                            <div class="transactions-card">
+                                <mat-card-header>
+                                    <mat-card-title>Recent Transactions</mat-card-title>
+                                    <button mat-button color="primary">View All</button>
+                                </mat-card-header>
+                                <mat-divider></mat-divider>
+                                <div class="transactions-list">
+                                    <!-- Placeholder transactions -->
+                                    <div class="transaction-item" *ngFor="let i of [1, 2, 3, 4, 5]">
+                                        <div class="transaction-details">
+                                            <div class="transaction-icon expense-icon">
+                                                <mat-icon>arrow_upward</mat-icon>
+                                            </div>
+                                            <div class="transaction-info">
+                                                <span class="transaction-name">Transaction {{ i }}</span>
+                                                <span class="transaction-category">Category</span>
+                                            </div>
+                                        </div>
+                                        <div class="transaction-amount-container">
+                                            <span class="transaction-amount expense-amount">${{ 100 * i }}.00</span>
+                                            <span class="transaction-date">Mar {{ i }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <mat-card class="dashboard-card component-3">
+                    <mat-card-header>
+                        <mat-card-title>Component 3</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <!-- Placeholder content -->
+                        <div class="placeholder-content">
+                            <mat-icon class="placeholder-icon">bar_chart</mat-icon>
+                            <p>Financial Summary</p>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <mat-card class="dashboard-card component-4">
+                    <mat-card-header>
+                        <mat-card-title>Component 4</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <!-- Placeholder content -->
+                        <div class="placeholder-content">
+                            <mat-icon class="placeholder-icon">calendar_today</mat-icon>
+                            <p>Calendar View</p>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+
+            <!-- Bottom Row Components -->
+            <div class="grid-row">
+                <mat-card class="dashboard-card component-5">
+                    <mat-card-header>
+                        <mat-card-title>Component 5</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <app-monthly-chart></app-monthly-chart>
+                    </mat-card-content>
+                </mat-card>
+
+                <mat-card class="dashboard-card component-6">
+                    <mat-card-header>
+                        <mat-card-title>Component 6</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <app-weekly-calendar></app-weekly-calendar>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+    </div>
+</div>

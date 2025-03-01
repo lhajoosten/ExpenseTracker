@@ -132,7 +132,7 @@ namespace ExpenseTracker.Api.Controllers
                     catch (Exception ex)
                     {
                         _logger.LogWarning(ex, "Error ensuring user exists during state failure handling");
-                        // return Redirect($"{_configuration["App:ClientUrl"]}?error=state_failure&message={Uri.EscapeDataString(ex.Message)}");
+                        return Redirect($"{_configuration["App:ClientUrl"]}?error=state_failure&message={Uri.EscapeDataString(ex.Message)}");
                     }
 
                     return Redirect($"{_configuration["App:ClientUrl"]}/dashboard?auth=success");

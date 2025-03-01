@@ -1,0 +1,251 @@
+.calendar-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    mat-card-header {
+        padding: 16px 16px 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        mat-card-title {
+            color: var(--text-primary);
+        }
+    }
+
+    mat-card-content {
+        padding: 0 16px 16px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .calendar-navigation {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .week-label {
+            font-size: 14px;
+            font-weight: 500;
+            min-width: 100px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        button {
+            color: var(--text-secondary);
+
+            &:hover {
+                color: var(--color-primary);
+            }
+        }
+    }
+
+    // Calendar Grid
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 4px;
+        margin: 16px;
+    }
+
+    .weekday-header {
+        text-align: center;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        padding: 8px 0;
+    }
+
+    .day-cell {
+        min-height: 60px;
+        border-radius: 4px;
+        background-color: var(--background-default);
+        padding: 4px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+
+        &.current-day {
+            background-color: rgba(var(--primary-color), 0.1);
+            border: 1px solid rgba(var(--primary-color), 0.3);
+
+            .day-number {
+                color: var(--color-primary);
+                font-weight: 500;
+            }
+        }
+
+        &.other-month {
+            opacity: 0.5;
+        }
+
+        .day-number {
+            font-size: 14px;
+            font-weight: 400;
+            margin-bottom: 4px;
+            align-self: flex-start;
+            color: var(--text-primary);
+        }
+
+        .expense-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background-color: rgba(var(--color-danger), 0.1);
+            color: var(--color-danger);
+            border-radius: 12px;
+            padding: 2px 6px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: auto;
+            align-self: flex-start;
+
+            mat-icon {
+                font-size: 12px;
+                width: 12px;
+                height: 12px;
+            }
+        }
+    }
+
+    // Upcoming Transactions
+    .upcoming-transactions {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 0 16px 16px;
+
+        h3 {
+            font-size: 16px;
+            font-weight: 500;
+            margin: 0 0 12px 0;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+    }
+
+    .transactions-list {
+        flex-grow: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .transaction-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        background-color: var(--background-default);
+        border-radius: 8px;
+        transition: background-color 0.2s ease;
+        margin-bottom: 8px;
+
+        &:hover {
+            background-color: rgba(var(--primary-color), 0.05);
+        }
+
+        &.paid {
+            opacity: 0.6;
+
+            .transaction-name {
+                text-decoration: line-through;
+            }
+        }
+
+        .transaction-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .transaction-info {
+            display: flex;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .transaction-category,
+        .transaction-date {
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .transaction-category::after {
+            content: "•";
+            margin-left: 8px;
+        }
+
+        .transaction-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .transaction-amount {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--color-danger);
+        }
+
+        .pay-button {
+            color: #4caf50;
+        }
+
+        .no-transactions {
+            text-align: center;
+            color: rgba(0, 0, 0, 0.6);
+            padding: 16px 0;
+        }
+    }
+
+    // Responsive adjustments
+    @media (max-width: 768px) {
+        .calendar-grid {
+            gap: 2px;
+        }
+
+        .day-cell {
+            min-height: 50px;
+            padding: 2px;
+        }
+
+        .weekday-header {
+            font-size: 11px;
+        }
+
+        .day-number {
+            font-size: 12px;
+        }
+
+        .expense-indicator {
+            font-size: 10px;
+            padding: 1px 4px;
+
+            span {
+                display: none; // Hide the amount on small screens
+            }
+        }
+
+        .transaction-info {
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .transaction-category::after {
+            content: "";
+            margin-left: 0;
+        }
+    }
+}

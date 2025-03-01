@@ -1,1 +1,42 @@
-<p>confirm-email works!</p>
+<div class="confirm-email-container">
+    <mat-card class="confirm-email-card">
+        <div class="card-content">
+            <!-- Loading State -->
+            <div *ngIf="isLoading" class="loading-state">
+                <mat-progress-spinner diameter="60" mode="indeterminate" color="primary">
+                </mat-progress-spinner>
+                <h2>Verifying your email...</h2>
+                <p>Please wait while we confirm your account.</p>
+            </div>
+
+            <!-- Success State -->
+            <div *ngIf="!isLoading && isSuccess" class="success-state">
+                <div class="icon-container success">
+                    <mat-icon>check_circle</mat-icon>
+                </div>
+                <h2>Email Verified Successfully!</h2>
+                <p>Your email has been confirmed. You can now sign in to your account.</p>
+                <button mat-raised-button color="primary" class="action-button" (click)="navigateToLogin()">
+                    Sign In
+                </button>
+            </div>
+
+            <!-- Error State -->
+            <div *ngIf="!isLoading && !isSuccess" class="error-state">
+                <div class="icon-container error">
+                    <mat-icon>error</mat-icon>
+                </div>
+                <h2>Verification Failed</h2>
+                <p>{{ errorMessage }}</p>
+                <div class="action-buttons">
+                    <button mat-stroked-button color="primary" (click)="resendConfirmation()">
+                        Resend Confirmation
+                    </button>
+                    <button mat-raised-button color="primary" (click)="navigateToLogin()">
+                        Go to Sign In
+                    </button>
+                </div>
+            </div>
+        </div>
+    </mat-card>
+</div>
