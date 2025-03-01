@@ -1,5 +1,6 @@
 ﻿using ExpenseTracker.Common.Abstractions.OAuth;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ExpenseTracker.Api.Controllers
 {
@@ -33,7 +34,9 @@ namespace ExpenseTracker.Api.Controllers
                 returnUrl ??= _configuration["App:ClientUrl"]!;
 
                 if (!_providerService.IsProviderSupported(provider))
-                    BadRequest(new { message = $"Unsupported provider: {provider}" });
+                {
+                    return BadRequest(new { message = $"Unsupported provider: {provider}" });
+                }
 
                 var properties = await _oauthService.ConfigureExternalAuthenticationAsync(provider, returnUrl);
                 var normalizedProvider = _providerService.NormalizeProviderName(provider);
@@ -63,18 +66,25 @@ namespace ExpenseTracker.Api.Controllers
         {
             try
             {
-                if (!User.Identity!.IsAuthenticated)
-                    Ok(new { success = false, message = "User not authenticated" });
+                if (!IsUserAuthenticated())
+                {
+                    return Unauthorized(new { success = false, message = "User not authenticated" });
+                }
+
+                _logger.LogInformation("Auth status check for authenticated user");
 
                 var result = await _oauthUserService.GetCurrentUserStatusAsync(User);
 
                 if (!result.IsSuccess)
-                    Ok(new { success = false, error = result.ErrorMessage });
+                {
+                    return Ok(new { success = false, error = result.ErrorMessage });
+                }
 
                 return Ok(new { success = true, user = result.User });
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error in CheckAuthStatus");
                 return Ok(new { success = false, error = ex.Message });
             }
         }
@@ -82,8 +92,12 @@ namespace ExpenseTracker.Api.Controllers
         [HttpGet("ensure-user")]
         public async Task<IActionResult> EnsureUserExists()
         {
-            if (!User.Identity!.IsAuthenticated)
-                Ok(new { success = false, message = "Not authenticated" });
+            if (!IsUserAuthenticated())
+            {
+                return Unauthorized(new { success = false, message = "User not authenticated" });
+            }
+
+            _logger.LogInformation("EnsureUserExists called for authenticated user");
 
             var result = await _oauthUserService.EnsureUserExistsAsync(User);
 
@@ -98,18 +112,27 @@ namespace ExpenseTracker.Api.Controllers
         [HttpGet("handle-state-failure")]
         public async Task<IActionResult> HandleStateFailure(string provider, string error)
         {
+            _logger.LogInformation("Handling state validation failure for {Provider}", provider);
+
             try
             {
-                if (User.Identity?.IsAuthenticated == true)
+                // More thorough authentication check
+                if (User.Identity?.IsAuthenticated == true &&
+                    !string.IsNullOrEmpty(User.FindFirstValue(ClaimTypes.NameIdentifier)))
                 {
                     try
                     {
-                        await _oauthUserService.EnsureUserExistsAsync(User);
+                        var result = await _oauthUserService.EnsureUserExistsAsync(User);
+                        if (!result.IsSuccess)
+                        {
+                            _logger.LogWarning("Failed to ensure user exists: {Error}", result.ErrorMessage);
+                            return Redirect($"{_configuration["App:ClientUrl"]}?error=user_creation_failed");
+                        }
                     }
                     catch (Exception ex)
                     {
-                        // Log but don't fail
                         _logger.LogWarning(ex, "Error ensuring user exists during state failure handling");
+                        // return Redirect($"{_configuration["App:ClientUrl"]}?error=state_failure&message={Uri.EscapeDataString(ex.Message)}");
                     }
 
                     return Redirect($"{_configuration["App:ClientUrl"]}/dashboard?auth=success");
@@ -119,8 +142,18 @@ namespace ExpenseTracker.Api.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error in HandleStateFailure");
                 return Redirect($"{_configuration["App:ClientUrl"]}?error=unknown&message={Uri.EscapeDataString(ex.Message)}");
             }
+        }
+
+        private bool IsUserAuthenticated()
+        {
+            // Check multiple criteria to verify authentic authentication
+            return User.Identity?.IsAuthenticated == true &&
+                   !string.IsNullOrEmpty(User.FindFirstValue(ClaimTypes.NameIdentifier)) &&
+                   (!string.IsNullOrEmpty(User.FindFirstValue(ClaimTypes.Email)) ||
+                    !string.IsNullOrEmpty(User.FindFirstValue(ClaimTypes.Name)));
         }
 
         private async Task<IActionResult> HandleCallbackAsync(string provider)

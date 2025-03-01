@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Security.Claims;
 
 namespace ExpenseTracker.Infrastructure.Identity.Configuration
 {
@@ -72,6 +73,8 @@ namespace ExpenseTracker.Infrastructure.Identity.Configuration
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.SignIn.RequireConfirmedPhoneNumber = false;
                 options.SignIn.RequireConfirmedEmail = true;
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
             })
             .AddRoles<AppRole>()
             .AddRoleManager<RoleManager<AppRole>>()
@@ -98,8 +101,25 @@ namespace ExpenseTracker.Infrastructure.Identity.Configuration
                 options.Cookie.HttpOnly = true;
                 options.Cookie.SameSite = SameSiteMode.Lax;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-                options.ExpireTimeSpan = TimeSpan.FromDays(7);
-                options.SlidingExpiration = true;
+
+                options.ExpireTimeSpan = TimeSpan.FromHours(4); // Shorter, more controlled session
+                options.SlidingExpiration = false; // Prevent automatic extension     
+                options.Cookie.IsEssential = true; // Add more robust cookie validation
+
+                // Validate the principal when reading the cookie
+                options.Events.OnValidatePrincipal = async context =>
+                {
+                    // Check for required claims
+                    var nameClaim = context.Principal!.FindFirstValue(ClaimTypes.Name);
+                    var emailClaim = context.Principal!.FindFirstValue(ClaimTypes.Email);
+                    var idClaim = context.Principal!.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                    if (string.IsNullOrEmpty(idClaim) || (string.IsNullOrEmpty(nameClaim) && string.IsNullOrEmpty(emailClaim)))
+                    {
+                        context.RejectPrincipal();
+                        await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    }
+                };
 
                 // Add logging for diagnosis
                 options.Events = new CookieAuthenticationEvents
@@ -137,9 +157,9 @@ namespace ExpenseTracker.Infrastructure.Identity.Configuration
                 // Force correlation cookie creation
                 options.CorrelationCookie.Name = ".AspNetCore.Correlation.Microsoft";
                 options.CorrelationCookie.HttpOnly = true;
-                options.CorrelationCookie.SameSite = SameSiteMode.Lax; // Change from Lax to None
+                options.CorrelationCookie.SameSite = SameSiteMode.None;
                 options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
-                options.CorrelationCookie.Expiration = TimeSpan.FromMinutes(15);
+                options.CorrelationCookie.Expiration = TimeSpan.FromMinutes(30);
 
                 options.SignInScheme = "Identity.Application";
 
@@ -174,9 +194,9 @@ namespace ExpenseTracker.Infrastructure.Identity.Configuration
                 // Force correlation cookie creation
                 options.CorrelationCookie.Name = ".AspNetCore.Correlation.GitHub";
                 options.CorrelationCookie.HttpOnly = true;
-                options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+                options.CorrelationCookie.SameSite = SameSiteMode.None;
                 options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
-                options.CorrelationCookie.Expiration = TimeSpan.FromMinutes(15);
+                options.CorrelationCookie.Expiration = TimeSpan.FromMinutes(30);
 
                 options.SignInScheme = "Identity.Application";
 

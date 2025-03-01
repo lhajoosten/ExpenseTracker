@@ -47,7 +47,7 @@ namespace ExpenseTracker.Infrastructure.OAuth.Services
                     Firstname = appUser.FirstName ?? "",
                     Lastname = appUser.LastName ?? "",
                     EmailConfirmed = appUser.EmailConfirmed,
-                    Roles = roles.Select(r => new ApplicationRoleDto { Name = r }).ToList()
+                    Roles = [.. roles.Select(r => new ApplicationRoleDto { Name = r })]
                 };
 
                 return OAuthLoginResult.Success("", userDto);

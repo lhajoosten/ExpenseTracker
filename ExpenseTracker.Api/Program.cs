@@ -4,7 +4,7 @@ using ExpenseTracker.Infrastructure.Identity.Configuration;
 using ExpenseTracker.Infrastructure.Identity.Seeding;
 using ExpenseTracker.Infrastructure.Mailing.Configuration;
 using ExpenseTracker.Infrastructure.OAuth.Configuration;
-using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.OpenApi.Models;
 
 namespace ExpenseTracker.Api
@@ -46,10 +46,11 @@ namespace ExpenseTracker.Api
             services.AddDistributedMemoryCache();
             services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromMinutes(60);
+                options.IdleTimeout = TimeSpan.FromMinutes(30); // Shorter timeout
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
-                options.Cookie.SameSite = SameSiteMode.None;
+                options.Cookie.SameSite = SameSiteMode.Strict;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             });
             services.AddIdentityService(configuration);
             services.AddMailingService(configuration);
@@ -129,7 +130,14 @@ namespace ExpenseTracker.Api
             }
 
             // 4. Use Exception Handler Middleware.
-            app.UseAuthenticationExceptionHandler();
+            // app.UseAuthenticationExceptionHandler();
+
+            app.UseCookiePolicy(new CookiePolicyOptions
+            {
+                MinimumSameSitePolicy = SameSiteMode.Lax,
+                Secure = CookieSecurePolicy.Always,
+                HttpOnly = HttpOnlyPolicy.Always
+            });
 
             // 5. Enforce HTTPS.
             app.UseHttpsRedirection();
@@ -145,6 +153,7 @@ namespace ExpenseTracker.Api
 
             // 9. Apply Authentication & Authorization.
             app.UseAuthentication();
+            app.UseAuthenticationValidation();
             app.UseAuthorization();
 
             // 10. Map API Controllers.
