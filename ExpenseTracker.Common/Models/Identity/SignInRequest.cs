@@ -1,4 +1,4 @@
-﻿namespace ExpenseTracker.Common.Models
+﻿namespace ExpenseTracker.Common.Models.Identity
 {
     public class SignInRequest(string email, string password, bool rememberMe)
     {

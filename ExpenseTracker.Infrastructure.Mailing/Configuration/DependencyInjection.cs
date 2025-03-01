@@ -4,7 +4,7 @@ using ExpenseTracker.Infrastructure.Mailing.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ExpenseTracker.Infrastructure.Mailing
+namespace ExpenseTracker.Infrastructure.Mailing.Configuration
 {
     public static class DependencyInjection
     {

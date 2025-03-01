@@ -1,4 +1,4 @@
-﻿namespace ExpenseTracker.Common.Models
+﻿namespace ExpenseTracker.Common.Models.Identity
 {
     public class ChangePasswordRequest
     {
