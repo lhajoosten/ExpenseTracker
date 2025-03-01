@@ -1,0 +1,154 @@
+<div class="login-container">
+    <mat-card class="login-card">
+        <mat-card-header>
+            <mat-card-title>Sign In</mat-card-title>
+            <mat-card-subtitle>Access your account</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+            <form
+                [formGroup]="loginForm"
+                (ngSubmit)="onSubmit()"
+                class="login-form"
+            >
+                <!-- Email Field -->
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Email</mat-label>
+                    <input
+                        matInput
+                        type="email"
+                        formControlName="email"
+                        placeholder="your.email@example.com"
+                        required
+                    />
+                    <mat-icon matPrefix>email</mat-icon>
+                    <mat-error
+                        *ngIf="loginForm.get('email')?.hasError('required')"
+                    >
+                        Email is required
+                    </mat-error>
+                    <mat-error
+                        *ngIf="loginForm.get('email')?.hasError('email')"
+                    >
+                        Please enter a valid email address
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Password Field -->
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Password</mat-label>
+                    <input
+                        matInput
+                        [type]="hidePassword ? 'password' : 'text'"
+                        formControlName="password"
+                        required
+                    />
+                    <mat-icon matPrefix>lock</mat-icon>
+                    <button
+                        mat-icon-button
+                        matSuffix
+                        (click)="hidePassword = !hidePassword"
+                        [attr.aria-label]="'Hide password'"
+                        [attr.aria-pressed]="hidePassword"
+                        type="button"
+                    >
+                        <mat-icon>{{
+                            hidePassword ? "visibility_off" : "visibility"
+                        }}</mat-icon>
+                    </button>
+                    <mat-error
+                        *ngIf="loginForm.get('password')?.hasError('required')"
+                    >
+                        Password is required
+                    </mat-error>
+                    <mat-error
+                        *ngIf="loginForm.get('password')?.hasError('minlength')"
+                    >
+                        Password must be at least 6 characters
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Remember Me Checkbox -->
+                <div class="remember-forgot-row">
+                    <mat-checkbox formControlName="rememberMe" color="primary">
+                        Remember me
+                    </mat-checkbox>
+                    <a
+                        routerLink="/auth/forgot-password"
+                        class="forgot-password-link"
+                    >
+                        Forgot password?
+                    </a>
+                </div>
+
+                <!-- Error Message -->
+                <div *ngIf="errorMessage" class="error-message">
+                    <mat-icon>error</mat-icon>
+                    <span>{{ errorMessage }}</span>
+                </div>
+
+                <!-- Login Button -->
+                <button
+                    mat-raised-button
+                    color="primary"
+                    type="submit"
+                    class="full-width login-button"
+                    [disabled]="loginForm.invalid || loading"
+                >
+                    <mat-progress-spinner
+                        *ngIf="loading"
+                        diameter="20"
+                        mode="indeterminate"
+                        class="spinner"
+                    ></mat-progress-spinner>
+                    <span>Sign In</span>
+                </button>
+
+                <!-- OAuth Sign-In Divider -->
+                <div class="divider">
+                    <span class="divider-line"></span>
+                    <span class="divider-text">OR</span>
+                    <span class="divider-line"></span>
+                </div>
+
+                <!-- OAuth Buttons -->
+                <div class="oauth-buttons">
+                    <button
+                        mat-stroked-button
+                        type="button"
+                        class="microsoft-button"
+                        (click)="loginWithMicrosoft()"
+                    >
+                        <img
+                            src="assets/icons/microsoft-logo.svg"
+                            alt="Microsoft"
+                            class="provider-icon"
+                        />
+                        <span>Sign in with Microsoft</span>
+                    </button>
+
+                    <button
+                        mat-stroked-button
+                        type="button"
+                        class="github-button"
+                        (click)="loginWithGithub()"
+                    >
+                        <img
+                            src="assets/icons/github-logo.svg"
+                            alt="GitHub"
+                            class="provider-icon"
+                        />
+                        <span>Sign in with GitHub</span>
+                    </button>
+                </div>
+            </form>
+        </mat-card-content>
+
+        <mat-card-actions class="card-actions">
+            <span>Don't have an account?</span>
+            <button mat-button color="accent" (click)="navigateToRegister()">
+                Create Account
+            </button>
+        </mat-card-actions>
+    </mat-card>
+</div>

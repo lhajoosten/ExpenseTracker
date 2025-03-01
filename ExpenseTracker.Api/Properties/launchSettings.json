@@ -4,34 +4,55 @@
       "commandName": "Project",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_Kestrel__Certificates__Default__Path": "C:/Users/lhajo/.aspnet/https/dev-cert.pfx",
-        "ASPNETCORE_Kestrel__Certificates__Default__Password": "YourSecurePassword123!"
+        "ASPNETCORE_Kestrel__Certificates__Default__Path": "%USERPROFILE%/.aspnet/https/dev-cert.pfx",
+        "ASPNETCORE_Kestrel__Certificates__Default__Password": "YourSecurePassword123!",
+        "VaultUri": "https://expensetracker-vault.vault.azure.net/"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:8000"
     },
     "https": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "launchBrowser": false,
       "launchUrl": "https://localhost:8443/api/v1/swagger/index.html",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_Kestrel__Certificates__Default__Path": "C:/Users/lhajo/.aspnet/https/dev-cert.pfx",
-        "ASPNETCORE_Kestrel__Certificates__Default__Password": "YourSecurePassword123!"
+        "ASPNETCORE_Kestrel__Certificates__Default__Path": "%USERPROFILE%/.aspnet/https/dev-cert.pfx",
+        "ASPNETCORE_Kestrel__Certificates__Default__Password": "YourSecurePassword123!",
+        "VaultUri": "https://expensetracker-vault.vault.azure.net/"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "https://localhost:5443;http://localhost:8000"
+      "applicationUrl": "https://localhost:8443;http://localhost:8000"
     },
     "Container (Dockerfile)": {
       "commandName": "Docker",
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/api/v1/swagger",
       "environmentVariables": {
         "ASPNETCORE_HTTPS_PORTS": "8443",
-        "ASPNETCORE_HTTP_PORTS": "8000"
+        "ASPNETCORE_HTTP_PORTS": "8000",
+        "VaultUri": "https://expensetracker-vault.vault.azure.net/"
       },
       "publishAllPorts": true,
       "useSSL": true
+    },
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_Kestrel__Certificates__Default__Path": "%USERPROFILE%/.aspnet/https/dev-cert.pfx",
+        "ASPNETCORE_Kestrel__Certificates__Default__Password": "YourSecurePassword123!",
+        "VaultUri": "https://expensetracker-vault.vault.azure.net/"
+      }
     }
   },
-  "$schema": "https://json.schemastore.org/launchsettings.json"
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:8000/",
+      "sslPort": 8443
+    }
+  }
 }
