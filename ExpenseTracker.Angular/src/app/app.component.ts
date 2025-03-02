@@ -1,16 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, RouterModule, RouterOutlet } from '@angular/router';
-import { HeaderComponent } from './shared/components/header/header.component';
+import { Router, RouterModule } from '@angular/router';
+import { HeaderComponent } from './shared/layouts/header/header.component';
+import { LeftSidebarComponent } from './shared/layouts/left-sidebar/left-sidebar.component';
+import { RightSidebarComponent } from './shared/layouts/right-sidebar/right-sidebar.component';
 import { materialModules } from './shared/shared.config';
 import { CommonModule } from '@angular/common';
 import { AuthService } from './core/services/auth.service';
 
 @Component({
     selector: 'app-root',
-    imports: [CommonModule, RouterModule, HeaderComponent, materialModules],
+    standalone: true,
+    imports: [CommonModule, RouterModule, HeaderComponent, LeftSidebarComponent, RightSidebarComponent, materialModules],
     templateUrl: './app.component.html',
-    styleUrl: './app.component.scss',
-    standalone: true
+    styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
     title = 'Dashboard App';

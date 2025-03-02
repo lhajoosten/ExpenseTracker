@@ -1,0 +1,58 @@
+<div class="sidebar">
+    <div class="logo-container">
+        <mat-icon class="app-logo">add_chart</mat-icon>
+        <h1 class="app-name">ExpenseTracker</h1>
+    </div>
+
+    <nav class="sidebar-nav">
+        <ul class="menu-list">
+            <li class="menu-item" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                <a [routerLink]="['/dashboard']" class="menu-link">
+                    <mat-icon>dashboard</mat-icon>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="menu-item" routerLinkActive="active">
+                <a [routerLink]="['/transactions']" class="menu-link">
+                    <mat-icon>account_balance_wallet</mat-icon>
+                    <span>Transactions</span>
+                </a>
+            </li>
+            <li class="menu-item" routerLinkActive="active">
+                <a [routerLink]="['/categories']" class="menu-link">
+                    <mat-icon>category</mat-icon>
+                    <span>Categories</span>
+                </a>
+            </li>
+            <li class="menu-item" routerLinkActive="active">
+                <a [routerLink]="['/budgets']" class="menu-link">
+                    <mat-icon>savings</mat-icon>
+                    <span>Budgets</span>
+                </a>
+            </li>
+            <li class="menu-item" routerLinkActive="active">
+                <a [routerLink]="['/analytics']" class="menu-link">
+                    <mat-icon>bar_chart</mat-icon>
+                    <span>Analytics</span>
+                </a>
+            </li>
+            <li class="menu-item" routerLinkActive="active">
+                <a [routerLink]="['/goals']" class="menu-link">
+                    <mat-icon>flag</mat-icon>
+                    <span>Goals</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+        <a [routerLink]="['/settings']" routerLinkActive="active" class="footer-link">
+            <mat-icon>settings</mat-icon>
+            <span>Settings</span>
+        </a>
+        <a href="https://support.expensetracker.com" target="_blank" class="footer-link">
+            <mat-icon>help_outline</mat-icon>
+            <span>Help</span>
+        </a>
+    </div>
+</div>

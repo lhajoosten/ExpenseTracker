@@ -1,0 +1,117 @@
+<div class="activity-sidebar">
+    <!-- User Profile Section -->
+    <div class="user-profile-section">
+        <div class="user-info">
+            <div class="user-greeting">
+                <h3>Welcome back,</h3>
+                <h2>{{userName}}</h2>
+            </div>
+            <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-avatar-button">
+                <img [src]="userAvatar" alt="User Avatar" class="user-avatar">
+            </button>
+        </div>
+
+        <mat-menu #userMenu="matMenu" class="user-menu">
+            <div class="menu-header">
+                <img [src]="userAvatar" alt="User Avatar" class="menu-avatar">
+                <div class="menu-user-info">
+                    <span class="menu-username">{{userName}}</span>
+                    <span class="menu-email">{{userEmail}}</span>
+                </div>
+            </div>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="viewProfile()">
+                <mat-icon>person</mat-icon>
+                <span>My Profile</span>
+            </button>
+            <button mat-menu-item (click)="openAccountSettings()">
+                <mat-icon>settings</mat-icon>
+                <span>Account Settings</span>
+            </button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item (click)="logout()" class="logout-button">
+                <mat-icon>exit_to_app</mat-icon>
+                <span>Sign Out</span>
+            </button>
+        </mat-menu>
+    </div>
+
+    <!-- Quick Actions Section -->
+    <div class="quick-actions-section">
+        <h3 class="section-title">Quick Actions</h3>
+        <div class="quick-actions-grid">
+            <button mat-flat-button class="action-button expense-button" (click)="addExpense()">
+                <span>Add Expense</span>
+            </button>
+            <button mat-flat-button class="action-button income-button" (click)="addIncome()">
+                <span>Add Income</span>
+            </button>
+            <button mat-flat-button class="action-button transfer-button" (click)="transfer()">
+                <span>Transfer</span>
+            </button>
+            <button mat-flat-button class="action-button budget-button" (click)="manageBudget()">
+                <span>Budget</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Budget Alert Section -->
+    <div class="budget-alert-section" *ngIf="budgetAlerts?.length && budgetAlerts.length > 0">
+        <h3 class="section-title">Budget Alerts</h3>
+        <mat-card class="alert-card" *ngFor="let alert of budgetAlerts">
+            <mat-card-content>
+                <div class="alert-icon warning">
+                    <mat-icon>warning</mat-icon>
+                </div>
+                <div class="alert-content">
+                    <h4>{{alert.category}}</h4>
+                    <p>{{alert.message}}</p>
+                    <mat-progress-bar mode="determinate" [value]="alert.percentage"
+                        [color]="alert.color"></mat-progress-bar>
+                    <div class="progress-labels">
+                        <span>${{alert.spent}}</span>
+                        <span>${{alert.limit}}</span>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <!-- Recent Activity Section -->
+    <div class="activity-section">
+        <div class="activity-header">
+            <h3 class="section-title">Recent Activity</h3>
+            <button mat-button color="primary" (click)="viewAllActivity()">View All</button>
+        </div>
+
+        <div class="activity-filter">
+            <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>Filter activity</mat-label>
+                <input matInput [(ngModel)]="activityFilter" placeholder="Search activities">
+                <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+        </div>
+
+        <div class="activity-list">
+            <div class="activity-item" *ngFor="let item of filteredActivityItems">
+                <div [ngClass]="['activity-icon', item.type]">
+                    <mat-icon>{{getIconForActivityType(item.type)}}</mat-icon>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-title">
+                        <h4>{{item.title}}</h4>
+                        <span class="activity-time">{{item.time}}</span>
+                    </div>
+                    <p class="activity-description">{{item.description}}</p>
+                    <span class="activity-amount" [ngClass]="{'expense': item.amount < 0, 'income': item.amount > 0}">
+                        {{item.amount < 0 ? '-' : '+' }}${{Math.abs(item.amount).toFixed(2)}} </span>
+                </div>
+            </div>
+
+            <div class="no-activity" *ngIf="filteredActivityItems.length === 0">
+                <mat-icon>search_off</mat-icon>
+                <p>No activity found</p>
+            </div>
+        </div>
+    </div>
+</div>

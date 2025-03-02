@@ -1,115 +1,19 @@
 <!-- app.component.html -->
 <div class="app-container">
-    <!-- Left Sidebar -->
-    <div class="sidebar">
-        <div class="logo-container">
-            <div class="logo">Logo</div>
-        </div>
-
-        <nav class="sidebar-nav">
-            <ul class="menu-list">
-                <li class="menu-item active">
-                    <a [routerLink]="['/']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
-                        class="menu-link">
-                        <mat-icon>dashboard</mat-icon>
-                        <span>Menu Item 1</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a [routerLink]="['/item2']" routerLinkActive="active" class="menu-link">
-                        <mat-icon>account_balance_wallet</mat-icon>
-                        <span>Menu Item 2</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a [routerLink]="['/item3']" routerLinkActive="active" class="menu-link">
-                        <mat-icon>analytics</mat-icon>
-                        <span>Menu Item 3</span>
-                    </a>
-                </li>
-                <li class="menu-item">
-                    <a [routerLink]="['/item4']" routerLinkActive="active" class="menu-link">
-                        <mat-icon>assessment</mat-icon>
-                        <span>Menu Item 4</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-
-        <div class="sidebar-footer">
-            <a [routerLink]="['/settings']" class="footer-link">
-                <mat-icon>settings</mat-icon>
-                <span>Settings</span>
-            </a>
-            <a [routerLink]="['/help']" class="footer-link">
-                <mat-icon>help_outline</mat-icon>
-                <span>Help</span>
-            </a>
-        </div>
-    </div>
+    <!-- Left Sidebar (Navigation) -->
+    <app-left-sidebar role="navigation" aria-label="Main Navigation"></app-left-sidebar>
 
     <!-- Main Content Area with Header -->
     <div class="main-content-wrapper">
-        <!-- Header moved here between sidebars -->
+        <!-- Header -->
         <app-header></app-header>
 
-        <!-- Main Content Area -->
-        <main class="main-content">
+        <!-- Container for Routed Content -->
+        <main class="main-content" role="main">
             <router-outlet></router-outlet>
         </main>
     </div>
 
-    <!-- Right Sidebar -->
-    <div class="history-sidebar">
-        <div class="sidebar-top-controls">
-            <button mat-mini-fab color="primary" matTooltip="Calendar" (click)="openCalendar()">
-                <mat-icon>calendar_today</mat-icon>
-            </button>
-            <button mat-mini-fab color="primary" matTooltip="Notifications" (click)="openNotifications()">
-                <mat-icon>notifications</mat-icon>
-            </button>
-            <button mat-mini-fab color="primary" [matMenuTriggerFor]="profileMenu" matTooltip="Account Profile">
-                <mat-icon>account_circle</mat-icon>
-            </button>
-
-            <!-- Profile Menu -->
-            <mat-menu #profileMenu="matMenu">
-                <button mat-menu-item (click)="viewProfile()">
-                    <mat-icon>person</mat-icon>
-                    <span>My Profile</span>
-                </button>
-                <button mat-menu-item (click)="openSettings()">
-                    <mat-icon>settings</mat-icon>
-                    <span>Settings</span>
-                </button>
-                <mat-divider></mat-divider>
-                <button mat-menu-item (click)="logout()">
-                    <mat-icon>exit_to_app</mat-icon>
-                    <span>Logout</span>
-                </button>
-            </mat-menu>
-        </div>
-
-        <div class="history-header">
-            <h2>History log</h2>
-        </div>
-
-        <div class="history-content">
-            <div class="history-list">
-                <div class="history-item" *ngFor="let item of historyItems">
-                    <div class="history-item-content">
-                        <div class="history-icon">
-                            <mat-icon>history</mat-icon>
-                        </div>
-                        <div class="history-text">
-                            {{ item.text }}
-                        </div>
-                    </div>
-                    <div class="history-time">
-                        {{ item.time }}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Right Sidebar (Activity & Quick Actions) -->
+    <app-right-sidebar role="complementary" aria-label="Quick Actions and Activity"></app-right-sidebar>
 </div>

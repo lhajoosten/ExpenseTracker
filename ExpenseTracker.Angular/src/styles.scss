@@ -2,20 +2,15 @@
 @use "theme/palette" as palette;
 @use "theme/theme" as theme;
 
-// Include theme styles for core and each component
+// Include the core styles only once
 @include mat.core();
 
-// Define light theme
-.light-theme {
-    @include mat.all-component-themes(theme.$light-theme);
-    @include theme.theme-colors("light");
-}
+// Include the base theme for CSS variables
+@include theme.base-theme();
 
-// Define dark theme
-.dark-theme {
-    @include mat.all-component-themes(theme.$dark-theme);
-    @include theme.theme-colors("dark");
-}
+// Include theme classes for switching
+@include theme.light-theme();
+@include theme.dark-theme();
 
 // Base styles
 html,
@@ -31,6 +26,12 @@ body {
 }
 
 // Common utility classes
+.text-primary {
+    color: var(--color-primary) !important;
+}
+.text-accent {
+    color: var(--color-accent) !important;
+}
 .text-success {
     color: var(--color-success) !important;
 }
@@ -44,27 +45,79 @@ body {
     color: var(--color-info) !important;
 }
 
+.bg-primary {
+    background-color: var(--color-primary) !important;
+    opacity: 0.15;
+}
+.bg-accent {
+    background-color: var(--color-accent) !important;
+    opacity: 0.15;
+}
 .bg-success {
     background-color: var(--color-success) !important;
-    opacity: 0.1;
+    opacity: 0.15;
 }
 .bg-warning {
     background-color: var(--color-warning) !important;
-    opacity: 0.1;
+    opacity: 0.15;
 }
 .bg-danger {
     background-color: var(--color-danger) !important;
-    opacity: 0.1;
+    opacity: 0.15;
 }
 .bg-info {
     background-color: var(--color-info) !important;
-    opacity: 0.1;
+    opacity: 0.15;
+}
+
+// Transaction type colors
+.text-income {
+    color: var(--color-income) !important;
+}
+.text-expense {
+    color: var(--color-expense) !important;
+}
+.text-transfer {
+    color: var(--color-transfer) !important;
+}
+.text-system {
+    color: var(--color-system) !important;
+}
+
+.bg-income {
+    background-color: var(--color-income) !important;
+    opacity: 0.15;
+}
+.bg-expense {
+    background-color: var(--color-expense) !important;
+    opacity: 0.15;
+}
+.bg-transfer {
+    background-color: var(--color-transfer) !important;
+    opacity: 0.15;
+}
+.bg-system {
+    background-color: var(--color-system) !important;
+    opacity: 0.15;
+}
+
+// Gradient text utility
+.gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+// Gradient background utility
+.gradient-bg {
+    background: var(--gradient-primary-bg);
 }
 
 // Card styles
 .mat-mdc-card {
     background-color: var(--background-card) !important;
     color: var(--text-primary);
+    border: 1px solid var(--border-color);
 }
 
 // Typography
@@ -84,4 +137,21 @@ h6 {
 
 .text-disabled {
     color: var(--text-disabled);
+}
+
+// Border utilities
+.border-bottom {
+    border-bottom: 1px solid var(--border-color);
+}
+.border-top {
+    border-top: 1px solid var(--border-color);
+}
+.border {
+    border: 1px solid var(--border-color);
+}
+
+// Common element styling
+.sidebar {
+    background-color: var(--background-sidebar);
+    color: var(--text-primary);
 }

@@ -7,7 +7,7 @@ $app-primary: mat.m2-define-palette(palette.$primary-palette);
 $app-accent: mat.m2-define-palette(palette.$accent-palette);
 $app-warn: mat.m2-define-palette(palette.$warn-palette);
 
-// Light theme
+// Define the theme configurations (but don't include them yet)
 $light-theme: mat.m2-define-light-theme(
     (
         color: (
@@ -18,7 +18,6 @@ $light-theme: mat.m2-define-light-theme(
     )
 );
 
-// Dark theme
 $dark-theme: mat.m2-define-dark-theme(
     (
         color: (
@@ -29,48 +28,109 @@ $dark-theme: mat.m2-define-dark-theme(
     )
 );
 
+// Base theme - only apply CSS variables, no component styles
+@mixin base-theme {
+    :root {
+        @include theme-colors("dark");
+    }
+}
+
+// Light theme class-based switching
+@mixin light-theme {
+    .light-theme {
+        // Apply all component themes just once inside the class
+        @include mat.all-component-themes($light-theme);
+        @include theme-colors("light");
+    }
+}
+
+// Dark theme class-based switching
+@mixin dark-theme {
+    .dark-theme {
+        // Apply all component themes just once inside the class
+        @include mat.all-component-themes($dark-theme);
+        @include theme-colors("dark");
+    }
+}
+
 // Custom theme variables
 $theme-variables: (
     light: (
         // Background colors
-        background-default: #f5f5f5,
-        background-card: white,
+        background-default: map.get(
+                palette.$light-theme-colors,
+                background-default
+            ),
+        background-card: map.get(palette.$light-theme-colors, background-card),
+        background-sidebar: map.get(
+                palette.$light-theme-colors,
+                background-sidebar
+            ),
         // Text colors
-        text-primary: rgba(0, 0, 0, 0.87),
-        text-secondary: rgba(0, 0, 0, 0.6),
-        text-disabled: rgba(0, 0, 0, 0.38),
+        text-primary: map.get(palette.$light-theme-colors, text-primary),
+        text-secondary: map.get(palette.$light-theme-colors, text-secondary),
+        text-disabled: map.get(palette.$light-theme-colors, text-disabled),
         // Border colors
-        divider-color: rgba(0, 0, 0, 0.12),
+        border-color: map.get(palette.$light-theme-colors, border-color),
         // Status colors
+        color-primary: map.get(palette.$theme-colors, primary),
+        color-accent: map.get(palette.$theme-colors, accent),
         color-success: map.get(palette.$theme-colors, success),
         color-warning: map.get(palette.$theme-colors, warning),
         color-danger: map.get(palette.$theme-colors, danger),
         color-info: map.get(palette.$theme-colors, info),
+        // Special colors
+        color-income: map.get(palette.$theme-colors, income),
+        color-expense: map.get(palette.$theme-colors, expense),
+        color-transfer: map.get(palette.$theme-colors, transfer),
+        color-system: map.get(palette.$theme-colors, system),
     ),
     dark: (
         // Background colors
-        background-default: #1a1a1a,
-        background-card: #2d2d2d,
+        background-default: map.get(
+                palette.$dark-theme-colors,
+                background-default
+            ),
+        background-card: map.get(palette.$dark-theme-colors, background-card),
+        background-sidebar: map.get(
+                palette.$dark-theme-colors,
+                background-sidebar
+            ),
         // Text colors
-        text-primary: white,
-        text-secondary: rgba(255, 255, 255, 0.7),
-        text-disabled: rgba(255, 255, 255, 0.5),
+        text-primary: map.get(palette.$dark-theme-colors, text-primary),
+        text-secondary: map.get(palette.$dark-theme-colors, text-secondary),
+        text-disabled: map.get(palette.$dark-theme-colors, text-disabled),
         // Border colors
-        divider-color: rgba(255, 255, 255, 0.12),
+        border-color: map.get(palette.$dark-theme-colors, border-color),
         // Status colors
+        color-primary: map.get(palette.$theme-colors, primary),
+        color-accent: map.get(palette.$theme-colors, accent),
         color-success: map.get(palette.$theme-colors, success),
         color-warning: map.get(palette.$theme-colors, warning),
         color-danger: map.get(palette.$theme-colors, danger),
         color-info: map.get(palette.$theme-colors, info),
+        // Special colors
+        color-income: map.get(palette.$theme-colors, income),
+        color-expense: map.get(palette.$theme-colors, expense),
+        color-transfer: map.get(palette.$theme-colors, transfer),
+        color-system: map.get(palette.$theme-colors, system),
     ),
 );
 
-// Theme mixins
+// Theme colors mixin
 @mixin theme-colors($theme-name) {
     $vars: map.get($theme-variables, $theme-name);
 
-    // Apply all variables
-    @each $name, $value in $vars {
-        --#{$name}: #{$value};
+    @at-root {
+        :root {
+            // Apply all variables
+            @each $name, $value in $vars {
+                --#{$name}: #{$value};
+            }
+
+            // Add gradient variables
+            --gradient-primary: #{palette.$primary-gradient};
+            --gradient-primary-bg: #{palette.$primary-gradient-bg};
+        }
     }
 }
